@@ -3,6 +3,7 @@ package com.kwai.koom.javaoom.common;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,6 +58,7 @@ public class KHeapFile implements Parcelable {
 	}
 
 	public static KHeapFile buildInstance(File hprof, File report) {
+		Log.i("whereIsHprof","1:" + hprof.getAbsolutePath());
 		kHeapFile = getKHeapFile();
 		kHeapFile.hprof = new Hprof(hprof.getAbsolutePath());
 		kHeapFile.report = new Report(report.getAbsolutePath());
@@ -94,6 +96,7 @@ public class KHeapFile implements Parcelable {
 	private Hprof generateHprofFile() {
 		String name = getTimeStamp() + HPROF_FILE;
 		generateDir(KGlobalConfig.getHprofDir());
+		Log.i("whereIsHprof","2:" + KGlobalConfig.getHprofDir() + File.separator + name);
 		return new Hprof(KGlobalConfig.getHprofDir() + File.separator + name);
 	}
 
@@ -148,6 +151,7 @@ public class KHeapFile implements Parcelable {
 		}
 
 		public static Hprof file(String path) {
+			Log.i("whereIsHprof","3:" + path);
 			return new Hprof(path);
 		}
 

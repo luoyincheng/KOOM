@@ -1,5 +1,7 @@
 package com.kwai.koom.javaoom.common;
 
+import android.util.Log;
+
 import com.kwai.koom.javaoom.monitor.HeapThreshold;
 
 import java.io.File;
@@ -45,11 +47,13 @@ public class KConfig {
 	}
 
 	public String getRootDir() {
+		Log.i("whereIsHprof","2 - 3:" + rootDir);
 		return rootDir;
 	}
 
 	public void setRootDir(String rootDir) {
 		this.rootDir = rootDir;
+		Log.i("whereIsHprof","2 - 4:" + rootDir);
 	}
 
 	public String getProcessName() {
@@ -72,11 +76,14 @@ public class KConfig {
 			this.heapMaxRatio = KConstants.HeapThreshold.getDefaultMaxPercentRation();
 			this.heapOverTimes = KConstants.HeapThreshold.OVER_TIMES;
 			this.heapPollInterval = KConstants.HeapThreshold.POLL_INTERVAL;
-			File cacheFile = KGlobalConfig.getApplication().getCacheDir();
+//			File cacheFile = KGlobalConfig.getApplication().getCacheDir();
+			File cacheFile = KGlobalConfig.getApplication().getExternalCacheDir();
 			//issue https://github.com/KwaiAppTeam/KOOM/issues/30
+			Log.i("whereIsHprof","2 - 5 - 0:" + rootDir);
 			this.rootDir = cacheFile != null ?
 					cacheFile.getAbsolutePath() + File.separator + KOOM_DIR :
 					"/data/data/" + KGlobalConfig.getApplication().getPackageName() + "/cache/" + KOOM_DIR;
+			Log.i("whereIsHprof","2 - 5 - 1:" + rootDir);
 			File dir = new File(rootDir);
 			if (!dir.exists()) dir.mkdirs();
 			this.processName = KGlobalConfig.getApplication().getPackageName();

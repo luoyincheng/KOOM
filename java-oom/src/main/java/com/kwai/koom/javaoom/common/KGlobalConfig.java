@@ -1,6 +1,7 @@
 package com.kwai.koom.javaoom.common;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.kwai.koom.javaoom.monitor.HeapThreshold;
 import com.kwai.koom.javaoom.report.DefaultRunningInfoFetcher;
@@ -69,6 +70,7 @@ public class KGlobalConfig {
 		if (rootDir != null) {
 			return rootDir;
 		}
+		Log.i("whereIsHprof","2 - 2:" + getGlobalConfig().kConfig.getRootDir());
 		return rootDir = getGlobalConfig().kConfig.getRootDir();
 	}
 
@@ -87,6 +89,7 @@ public class KGlobalConfig {
 		if (hprofDir != null) {
 			return hprofDir;
 		}
+		Log.i("whereIsHprof","2 - 1:" + getRootDir() + File.separator + HPROF_DIR);
 		return hprofDir = getRootDir() + File.separator + HPROF_DIR;
 	}
 
