@@ -217,7 +217,8 @@ class KOOMInternal implements HeapDumpListener, HeapAnalysisListener {
 		//Do not save the hprof file by default.
 		if (hprofUploader == null || hprofUploader.deleteWhenUploaded()) {
 			KLog.i(TAG, "delete " + hprof.path);
-			hprof.delete();
+			//不删除hprof文件
+//			hprof.delete();
 		}
 	}
 
