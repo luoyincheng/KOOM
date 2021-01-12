@@ -1,13 +1,12 @@
 package com.kwai.koom.javaoom.analysis;
 
-import java.util.List;
-
-import android.util.Log;
 import android.util.Pair;
 
 import com.kwai.koom.javaoom.common.KHeapFile;
 import com.kwai.koom.javaoom.common.KLog;
 import com.kwai.koom.javaoom.report.HeapAnalyzeReporter;
+
+import java.util.List;
 
 import kshark.ApplicationLeak;
 import kshark.LibraryLeak;
@@ -31,27 +30,27 @@ import kshark.LibraryLeak;
  */
 class KHeapAnalyzer {
 
-  private static final String TAG = "HeapAnalyzer";
+	private static final String TAG = "HeapAnalyzer";
 
-  private SuspicionLeaksFinder leaksFinder;
+	private SuspicionLeaksFinder leaksFinder;
 
-  public KHeapAnalyzer(KHeapFile heapFile) {
-    leaksFinder = new SuspicionLeaksFinder(heapFile.hprof);
-  }
+	public KHeapAnalyzer(KHeapFile heapFile) {
+		leaksFinder = new SuspicionLeaksFinder(heapFile.hprof);
+	}
 
-  public boolean analyze() {
-    KLog.i(TAG, "analyze");
-    Pair<List<ApplicationLeak>, List<LibraryLeak>> leaks = leaksFinder.find();
-    if (leaks == null) {
-      return false;
-    }
+	public boolean analyze() {
+		KLog.i(TAG, "analyze");
+		Pair<List<ApplicationLeak>, List<LibraryLeak>> leaks = leaksFinder.find();
+		if (leaks == null) {
+			return false;
+		}
 
-    //Add gc path to report file.
-    HeapAnalyzeReporter.addGCPath(leaks, leaksFinder.leakReasonTable);
+		//Add gc path to report file.
+		HeapAnalyzeReporter.addGCPath(leaks, leaksFinder.leakReasonTable);
 
-    //Add done flag to report file.
-    HeapAnalyzeReporter.done();
-    return true;
-  }
+		//Add done flag to report file.
+		HeapAnalyzeReporter.done();
+		return true;
+	}
 
 }

@@ -1,7 +1,6 @@
 package com.kwai.koom.javaoom.analysis;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import com.kwai.koom.javaoom.common.KConstants;
 import com.kwai.koom.javaoom.common.KLog;
@@ -29,72 +28,71 @@ import kshark.HeapObject;
  */
 public class BitmapLeakDetector extends LeakDetector {
 
-  private static final String BITMAP_CLASS_NAME = "android.graphics.Bitmap";
-  private static final String TAG = "BitmapLeakDetector";
+	private static final String BITMAP_CLASS_NAME = "android.graphics.Bitmap";
+	private static final String TAG = "BitmapLeakDetector";
+	private long bitmapClassId;
+	private ClassCounter bitmapCounter;
+	private BitmapLeakDetector() {
+	}
 
-  private BitmapLeakDetector() {}
+	public BitmapLeakDetector(HeapGraph heapGraph) {
+		//bitmap
+		HeapObject.HeapClass bitmapHeapClass = heapGraph.findClassByName(BITMAP_CLASS_NAME);
+		assert bitmapHeapClass != null;
+		bitmapClassId = bitmapHeapClass.getObjectId();
+		bitmapCounter = new ClassCounter();
+	}
 
-  private long bitmapClassId;
-  private ClassCounter bitmapCounter;
+	@Override
+	public long classId() {
+		return bitmapClassId;
+	}
 
-  public BitmapLeakDetector(HeapGraph heapGraph) {
-    //bitmap
-    HeapObject.HeapClass bitmapHeapClass = heapGraph.findClassByName(BITMAP_CLASS_NAME);
-    assert bitmapHeapClass != null;
-    bitmapClassId = bitmapHeapClass.getObjectId();
-    bitmapCounter = new ClassCounter();
-  }
+	@Override
+	public String className() {
+		return BITMAP_CLASS_NAME;
+	}
 
-  @Override
-  public long classId() {
-    return bitmapClassId;
-  }
+	@Override
+	public Class<?> clazz() {
+		return Bitmap.class;
+	}
 
-  @Override
-  public String className() {
-    return BITMAP_CLASS_NAME;
-  }
+	@Override
+	public String leakReason() {
+		return "Bitmap Size";
+	}
 
-  @Override
-  public Class<?> clazz() {
-    return Bitmap.class;
-  }
+	@Override
+	public boolean isLeak(HeapObject.HeapInstance instance) {
+		if (VERBOSE_LOG) {
+			KLog.i(TAG, "run isLeak");
+		}
 
-  @Override
-  public String leakReason() {
-    return "Bitmap Size";
-  }
+		bitmapCounter.instancesCount++;
+		HeapField fieldWidth = instance.get(BITMAP_CLASS_NAME, "mWidth");
+		HeapField fieldHeight = instance.get(BITMAP_CLASS_NAME, "mHeight");
+		assert fieldHeight != null;
+		assert fieldWidth != null;
+		boolean abnormal = fieldHeight.getValue().getAsInt() == null
+				|| fieldWidth.getValue().getAsInt() == null;
+		if (abnormal) {
+			KLog.e(TAG, "ABNORMAL fieldWidth or fieldHeight is null");
+			return false;
+		}
+		int width = fieldWidth.getValue().getAsInt();
+		int height = fieldHeight.getValue().getAsInt();
+		boolean suspicionLeak = width * height >= KConstants.BitmapThreshold.DEFAULT_BIG_BITMAP;
+		if (suspicionLeak) {
+			KLog.e(TAG, "bitmap leak : " + instance.getInstanceClassName() + " " +
+					"width:" + width + " height:" + height);
+			bitmapCounter.leakInstancesCount++;
+		}
+		return suspicionLeak;
+	}
 
-  @Override
-  public boolean isLeak(HeapObject.HeapInstance instance) {
-    if (VERBOSE_LOG) {
-      KLog.i(TAG, "run isLeak");
-    }
-
-    bitmapCounter.instancesCount++;
-    HeapField fieldWidth = instance.get(BITMAP_CLASS_NAME, "mWidth");
-    HeapField fieldHeight = instance.get(BITMAP_CLASS_NAME, "mHeight");
-    assert fieldHeight != null;
-    assert fieldWidth != null;
-    boolean abnormal = fieldHeight.getValue().getAsInt() == null
-        || fieldWidth.getValue().getAsInt() == null;
-    if (abnormal) {
-      KLog.e(TAG, "ABNORMAL fieldWidth or fieldHeight is null");
-      return false;
-    }
-    int width = fieldWidth.getValue().getAsInt();
-    int height = fieldHeight.getValue().getAsInt();
-    boolean suspicionLeak = width * height >= KConstants.BitmapThreshold.DEFAULT_BIG_BITMAP;
-    if (suspicionLeak) {
-      KLog.e(TAG, "bitmap leak : " + instance.getInstanceClassName() + " " +
-          "width:" + width + " height:" + height);
-      bitmapCounter.leakInstancesCount++;
-    }
-    return suspicionLeak;
-  }
-
-  @Override
-  public ClassCounter instanceCount() {
-    return bitmapCounter;
-  }
+	@Override
+	public ClassCounter instanceCount() {
+		return bitmapCounter;
+	}
 }

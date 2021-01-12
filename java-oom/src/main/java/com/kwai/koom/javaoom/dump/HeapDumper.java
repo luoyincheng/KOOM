@@ -20,11 +20,11 @@ package com.kwai.koom.javaoom.dump;
  * @author Rui Li <lirui05@kuaishou.com>
  */
 public interface HeapDumper {
-  /**
-   * dump may cost several seconds, make sure called in a separated thread.
-   *
-   * @param path dump file
-   * @return dump result success or not
-   */
-  boolean dump(String path);
+	/**
+	 * dump may cost several seconds, make sure called in a separated thread.
+	 *
+	 * @param path dump file
+	 * @return dump result success or not
+	 */
+	boolean dump(String path);
 }

@@ -19,25 +19,25 @@ package com.kwai.koom.javaoom.monitor;
  */
 public interface Monitor {
 
-  /**
-   * @return monitor type
-   */
-  MonitorType monitorType();
+	/**
+	 * @return monitor type
+	 */
+	MonitorType monitorType();
 
-  /**
-   * set threshold
-   *
-   * @param threshold threshold
-   */
-  void setThreshold(Threshold threshold);
+	/**
+	 * set threshold
+	 *
+	 * @param threshold threshold
+	 */
+	void setThreshold(Threshold threshold);
 
-  TriggerReason getTriggerReason();
+	TriggerReason getTriggerReason();
 
-  boolean isTrigger();
+	boolean isTrigger();
 
-  void start();
+	void start();
 
-  void stop();
+	void stop();
 
-  int pollInterval();
+	int pollInterval();
 }

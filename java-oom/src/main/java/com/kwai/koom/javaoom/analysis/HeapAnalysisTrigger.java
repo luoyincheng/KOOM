@@ -1,7 +1,7 @@
 package com.kwai.koom.javaoom.analysis;
 
 import android.app.Application;
-import android.util.Log;
+
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.OnLifecycleEvent;
 
@@ -31,106 +31,105 @@ import com.kwai.koom.javaoom.report.HeapAnalyzeReporter;
  */
 public class HeapAnalysisTrigger implements KTrigger {
 
-  private static final String TAG = "HeapAnalysisTrigger";
+	private static final String TAG = "HeapAnalysisTrigger";
 
-  private HeapAnalysisListener heapAnalysisListener;
+	private HeapAnalysisListener heapAnalysisListener;
+	private boolean triggered;
+	private KTriggerStrategy strategy;
+	private volatile boolean isForeground;
+	private TriggerReason reTriggerReason;
 
-  public HeapAnalysisTrigger() {}
+	public HeapAnalysisTrigger() {
+	}
 
-  public void setHeapAnalysisListener(HeapAnalysisListener heapAnalysisListener) {
-    this.heapAnalysisListener = heapAnalysisListener;
-  }
+	public void setHeapAnalysisListener(HeapAnalysisListener heapAnalysisListener) {
+		this.heapAnalysisListener = heapAnalysisListener;
+	}
 
-  @Override
-  public void startTrack() {
-    KTriggerStrategy strategy = strategy();
-    if (strategy == KTriggerStrategy.RIGHT_NOW) {
-      trigger(TriggerReason.analysisReason(TriggerReason.AnalysisReason.RIGHT_NOW));
-    }
-  }
+	@Override
+	public void startTrack() {
+		KTriggerStrategy strategy = strategy();
+		if (strategy == KTriggerStrategy.RIGHT_NOW) {
+			trigger(TriggerReason.analysisReason(TriggerReason.AnalysisReason.RIGHT_NOW));
+		}
+	}
 
-  @Override
-  public void stopTrack() {}
+	@Override
+	public void stopTrack() {
+	}
 
-  public void doAnalysis(Application application) {
-    HeapAnalyzeService.runAnalysis(application, heapAnalysisListener);
-  }
+	public void doAnalysis(Application application) {
+		HeapAnalyzeService.runAnalysis(application, heapAnalysisListener);
+	}
 
-  private boolean triggered;
+	@Override
+	public void trigger(TriggerReason triggerReason) {
+		//do trigger when foreground
+		if (!isForeground) {
+			KLog.i(TAG, "reTrigger when foreground");
+			this.reTriggerReason = triggerReason;
+			return;
+		}
 
-  @Override
-  public void trigger(TriggerReason triggerReason) {
-    //do trigger when foreground
-    if (!isForeground) {
-      KLog.i(TAG, "reTrigger when foreground");
-      this.reTriggerReason = triggerReason;
-      return;
-    }
+		KLog.i(TAG, "trigger reason:" + triggerReason.analysisReason);
 
-    KLog.i(TAG, "trigger reason:" + triggerReason.analysisReason);
+		if (triggered) {
+			KLog.i(TAG, "Only once trigger!");
+			return;
+		}
+		triggered = true;
 
-    if (triggered) {
-      KLog.i(TAG, "Only once trigger!");
-      return;
-    }
-    triggered = true;
+		HeapAnalyzeReporter.addAnalysisReason(triggerReason.analysisReason);
 
-    HeapAnalyzeReporter.addAnalysisReason(triggerReason.analysisReason);
+		if (triggerReason.analysisReason == TriggerReason.AnalysisReason.REANALYSIS) {
+			HeapAnalyzeReporter.recordReanalysis();
+		}
 
-    if (triggerReason.analysisReason == TriggerReason.AnalysisReason.REANALYSIS) {
-      HeapAnalyzeReporter.recordReanalysis();
-    }
+		//test reanalysis
+		//if (triggerReason.analysisReason != TriggerReason.AnalysisReason.REANALYSIS) return;
 
-    //test reanalysis
-    //if (triggerReason.analysisReason != TriggerReason.AnalysisReason.REANALYSIS) return;
+		if (heapAnalysisListener != null) {
+			heapAnalysisListener.onHeapAnalysisTrigger();
+		}
 
-    if (heapAnalysisListener != null) {
-      heapAnalysisListener.onHeapAnalysisTrigger();
-    }
+		try {
+			doAnalysis(KGlobalConfig.getApplication());
+		} catch (Exception e) {
+			KLog.e(TAG, "doAnalysis failed");
+			e.printStackTrace();
+			if (heapAnalysisListener != null) {
+				heapAnalysisListener.onHeapAnalyzeFailed();
+			}
+		}
+	}
 
-    try {
-      doAnalysis(KGlobalConfig.getApplication());
-    } catch (Exception e) {
-      KLog.e(TAG, "doAnalysis failed");
-      e.printStackTrace();
-      if (heapAnalysisListener != null) {
-        heapAnalysisListener.onHeapAnalyzeFailed();
-      }
-    }
-  }
+	public void setStrategy(KTriggerStrategy strategy) {
+		this.strategy = strategy;
+	}
 
-  private KTriggerStrategy strategy;
+	@Override
+	public KTriggerStrategy strategy() {
+		if (strategy != null) {
+			return strategy;
+		}
 
-  public void setStrategy(KTriggerStrategy strategy) {
-    this.strategy = strategy;
-  }
+		return KTriggerStrategy.RIGHT_NOW;
+	}
 
-  @Override
-  public KTriggerStrategy strategy() {
-    if (strategy != null) {
-      return strategy;
-    }
+	@OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+	public void onBackground() {
+		KLog.i(TAG, "onBackground");
+		isForeground = false;
+	}
 
-    return KTriggerStrategy.RIGHT_NOW;
-  }
-
-  private volatile boolean isForeground;
-  private TriggerReason reTriggerReason;
-
-  @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-  public void onBackground() {
-    KLog.i(TAG, "onBackground");
-    isForeground = false;
-  }
-
-  @OnLifecycleEvent(Lifecycle.Event.ON_START)
-  public void onForeground() {
-    KLog.i(TAG, "onForeground");
-    isForeground = true;
-    if (reTriggerReason != null) {
-      TriggerReason tmpReason = reTriggerReason;
-      reTriggerReason = null;
-      trigger(tmpReason);
-    }
-  }
+	@OnLifecycleEvent(Lifecycle.Event.ON_START)
+	public void onForeground() {
+		KLog.i(TAG, "onForeground");
+		isForeground = true;
+		if (reTriggerReason != null) {
+			TriggerReason tmpReason = reTriggerReason;
+			reTriggerReason = null;
+			trigger(tmpReason);
+		}
+	}
 }

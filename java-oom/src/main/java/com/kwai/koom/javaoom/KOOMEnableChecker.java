@@ -2,7 +2,6 @@ package com.kwai.koom.javaoom;
 
 import android.os.Build;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.kwai.koom.javaoom.common.KConstants;
 import com.kwai.koom.javaoom.common.KGlobalConfig;
@@ -31,121 +30,120 @@ import com.kwai.koom.javaoom.common.KVData;
  */
 public class KOOMEnableChecker {
 
-  private static KOOMEnableChecker runningChecker;
+	private static KOOMEnableChecker runningChecker;
+	private Result result;
 
-  public static KOOMEnableChecker get() {
-    return runningChecker = (runningChecker == null
-            ? new KOOMEnableChecker() : runningChecker);
-  }
+	public static KOOMEnableChecker get() {
+		return runningChecker = (runningChecker == null
+				? new KOOMEnableChecker() : runningChecker);
+	}
 
-  /**
-   * Versions below Android 5.0 and above android 10.0 are incompatible now.
-   *
-   * @return support
-   */
-  public boolean isVersionPermit() {
-    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-        && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R;
-  }
+	/**
+	 * Check if KOOM can start.
+	 *
+	 * @return check result
+	 */
+	public static Result doCheck() {
+		runningChecker = get();
 
-  /**
-   * Each user can triggers most 3 times heap analysis as default.
-   *
-   * @return result
-   */
-  public boolean isMaxTimesOverflow() {
-    String version = KGlobalConfig.getRunningInfoFetcher().appVersion();
-    int times = KVData.getTriggerTimes(version);
-    KLog.i("koom", "version:" + version + " triggered times:" + times);
-    return times > KConstants.EnableCheck.TRIGGER_MAX_TIMES;
-  }
+		if (runningChecker.result != null) {
+			return runningChecker.result;
+		}
 
-  /**
-   * Each version can trigger most in 15 days as default.
-   * <p>
-   * Because when 15 days after almost all kinds of report are uploaded already.
-   *
-   * @return expired
-   */
-  public boolean isDateExpired() {
-    String version = KGlobalConfig.getRunningInfoFetcher().appVersion();
-    long time = KVData.firstLaunchTime(version);
-    KLog.i("koom", "version:" + version + " first launch time:" + time);
-    return System.currentTimeMillis() - time >
-        KConstants.EnableCheck.MAX_TIME_WINDOW_IN_DAYS * KConstants.Time.DAY_IN_MILLS;
-  }
+		if (!runningChecker.isVersionPermit()) {
+			return runningChecker.result = Result.OS_VERSION_NO_COMPATIBILITY;
+		}
 
-  /**
-   * Koom runs when disk space is enough.
-   *
-   * @return enough
-   */
-  public boolean isSpaceEnough() {
-    String dir = KGlobalConfig.getRootDir();
-    float space = KUtils.getSpaceInGB(dir);
-    if (KConstants.Debug.VERBOSE_LOG) {
-      KLog.i("koom", "Disk space:" + space + "Gb");
-    }
-    return space > KConstants.Disk.ENOUGH_SPACE_IN_GB;
-  }
+		if (!runningChecker.isSpaceEnough()) {
+			return runningChecker.result = Result.SPACE_NOT_ENOUGH;
+		}
 
-  /**
-   * KOOM java-oom focused on the JVM memory, so only main process are enabled default.
-   * <p>
-   * Other process's limit can be removed by set a custom KConfig.
-   *
-   * @return process permitted
-   */
-  public boolean isProcessPermitted() {
-    String enabledProcess = KGlobalConfig.getKConfig().getProcessName();
-    String runningProcess = KUtils.getProcessName();
-    KLog.i("koom", "enabledProcess:" + enabledProcess + ", runningProcess:" + runningProcess);
-    return TextUtils.equals(enabledProcess, runningProcess);
-  }
+		if (runningChecker.isDateExpired()) {
+			return runningChecker.result = Result.EXPIRED_DATE;
+		}
 
-  public enum Result {
-    NORMAL,
-    EXPIRED_DATE,
-    EXPIRED_TIMES,
-    SPACE_NOT_ENOUGH,
-    PROCESS_NOT_ENABLED,
-    OS_VERSION_NO_COMPATIBILITY,
-  }
+		if (runningChecker.isMaxTimesOverflow()) {
+			return runningChecker.result = Result.EXPIRED_TIMES;
+		}
 
-  private Result result;
+		if (!runningChecker.isProcessPermitted()) {
+			return runningChecker.result = Result.PROCESS_NOT_ENABLED;
+		}
 
-  /**
-   * Check if KOOM can start.
-   *
-   * @return check result
-   */
-  public static Result doCheck() {
-    runningChecker = get();
+		return Result.NORMAL;
+	}
 
-    if (runningChecker.result != null) {
-      return runningChecker.result;
-    }
+	/**
+	 * Versions below Android 5.0 and above android 10.0 are incompatible now.
+	 *
+	 * @return support
+	 */
+	public boolean isVersionPermit() {
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+				&& Build.VERSION.SDK_INT <= Build.VERSION_CODES.R;
+	}
 
-    if (!runningChecker.isVersionPermit()) {
-      return runningChecker.result = Result.OS_VERSION_NO_COMPATIBILITY;
-    }
+	/**
+	 * Each user can triggers most 3 times heap analysis as default.
+	 *
+	 * @return result
+	 */
+	public boolean isMaxTimesOverflow() {
+		String version = KGlobalConfig.getRunningInfoFetcher().appVersion();
+		int times = KVData.getTriggerTimes(version);
+		KLog.i("koom", "version:" + version + " triggered times:" + times);
+		return times > KConstants.EnableCheck.TRIGGER_MAX_TIMES;
+	}
 
-    if (!runningChecker.isSpaceEnough()) {
-      return runningChecker.result = Result.SPACE_NOT_ENOUGH;
-    }
+	/**
+	 * Each version can trigger most in 15 days as default.
+	 * <p>
+	 * Because when 15 days after almost all kinds of report are uploaded already.
+	 *
+	 * @return expired
+	 */
+	public boolean isDateExpired() {
+		String version = KGlobalConfig.getRunningInfoFetcher().appVersion();
+		long time = KVData.firstLaunchTime(version);
+		KLog.i("koom", "version:" + version + " first launch time:" + time);
+		return System.currentTimeMillis() - time >
+				KConstants.EnableCheck.MAX_TIME_WINDOW_IN_DAYS * KConstants.Time.DAY_IN_MILLS;
+	}
 
-    if (runningChecker.isDateExpired()) {
-      return runningChecker.result = Result.EXPIRED_DATE;
-    }
+	/**
+	 * Koom runs when disk space is enough.
+	 *
+	 * @return enough
+	 */
+	public boolean isSpaceEnough() {
+		String dir = KGlobalConfig.getRootDir();
+		float space = KUtils.getSpaceInGB(dir);
+		if (KConstants.Debug.VERBOSE_LOG) {
+			KLog.i("koom", "Disk space:" + space + "Gb");
+		}
+		return space > KConstants.Disk.ENOUGH_SPACE_IN_GB;
+	}
 
-    if (runningChecker.isMaxTimesOverflow()) {
-      return runningChecker.result = Result.EXPIRED_TIMES;
-    }
+	/**
+	 * KOOM java-oom focused on the JVM memory, so only main process are enabled default.
+	 * <p>
+	 * Other process's limit can be removed by set a custom KConfig.
+	 *
+	 * @return process permitted
+	 */
+	public boolean isProcessPermitted() {
+		String enabledProcess = KGlobalConfig.getKConfig().getProcessName();
+		String runningProcess = KUtils.getProcessName();
+		KLog.i("koom", "enabledProcess:" + enabledProcess + ", runningProcess:" + runningProcess);
+		return TextUtils.equals(enabledProcess, runningProcess);
+	}
 
-    if (!runningChecker.isProcessPermitted()) {
-      return runningChecker.result = Result.PROCESS_NOT_ENABLED;
-    }
-
-    return Result.NORMAL;
-  }
+	public enum Result {
+		NORMAL,
+		EXPIRED_DATE,
+		EXPIRED_TIMES,
+		SPACE_NOT_ENOUGH,
+		PROCESS_NOT_ENABLED,
+		OS_VERSION_NO_COMPATIBILITY,
+	}
 }

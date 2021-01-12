@@ -18,5 +18,5 @@ package com.kwai.koom.javaoom.monitor;
  * @author Rui Li <lirui05@kuaishou.com>
  */
 public interface MonitorTriggerListener {
-  boolean onTrigger(MonitorType monitorType, TriggerReason reason);
+	boolean onTrigger(MonitorType monitorType, TriggerReason reason);
 }

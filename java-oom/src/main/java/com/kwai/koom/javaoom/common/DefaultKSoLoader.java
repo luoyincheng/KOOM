@@ -19,14 +19,14 @@ package com.kwai.koom.javaoom.common;
  */
 public class DefaultKSoLoader implements KSoLoader {
 
-  @Override
-  public boolean loadLib(String libName) {
-    try {
-      System.loadLibrary(libName);
-    } catch (UnsatisfiedLinkError e) {
-      e.printStackTrace();
-      return false;
-    }
-    return true;
-  }
+	@Override
+	public boolean loadLib(String libName) {
+		try {
+			System.loadLibrary(libName);
+		} catch (UnsatisfiedLinkError e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
 }

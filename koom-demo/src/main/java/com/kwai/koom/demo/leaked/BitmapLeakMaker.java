@@ -24,10 +24,10 @@ import com.kwai.koom.javaoom.common.KConstants;
  */
 public class BitmapLeakMaker extends LeakMaker<Bitmap> {
 
-  @Override
-  public void startLeak(Context context) {
-    Bitmap bitmap = Bitmap.createBitmap(KConstants.BitmapThreshold.DEFAULT_BIG_WIDTH + 1,
-        KConstants.BitmapThreshold.DEFAULT_BIG_HEIGHT + 1, Bitmap.Config.ARGB_8888);
-    uselessObjectList.add(bitmap);
-  }
+	@Override
+	public void startLeak(Context context) {
+		Bitmap bitmap = Bitmap.createBitmap(KConstants.BitmapThreshold.DEFAULT_BIG_WIDTH + 1,
+				KConstants.BitmapThreshold.DEFAULT_BIG_HEIGHT + 1, Bitmap.Config.ARGB_8888);
+		uselessObjectList.add(bitmap);
+	}
 }

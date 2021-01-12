@@ -20,23 +20,23 @@ import java.util.Map;
  * @author Rui Li <lirui05@kuaishou.com>
  */
 public interface RunningInfoFetcher {
-  /**
-   * @return appversion
-   */
-  String appVersion();
+	/**
+	 * @return appversion
+	 */
+	String appVersion();
 
-  /**
-   * @return current page
-   */
-  String currentPage();
+	/**
+	 * @return current page
+	 */
+	String currentPage();
 
-  /**
-   * @return usage time in seconds
-   */
-  Integer usageSeconds();
+	/**
+	 * @return usage time in seconds
+	 */
+	Integer usageSeconds();
 
-  /**
-   * @return extended parameters by custom
-   */
-  Map<String, String> ext();
+	/**
+	 * @return extended parameters by custom
+	 */
+	Map<String, String> ext();
 }

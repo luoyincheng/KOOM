@@ -1,7 +1,5 @@
 package com.kwai.koom.javaoom.analysis;
 
-import android.util.Log;
-
 import com.kwai.koom.javaoom.common.KLog;
 
 import kshark.HeapGraph;
@@ -26,92 +24,91 @@ import kshark.HeapObject;
  */
 public class NativeAllocationRegistryLeakDetector extends LeakDetector {
 
-  private static final String TAG = "NativeAllocation";
+	private static final String TAG = "NativeAllocation";
 
-  private static final String NATIVE_ALLOCATION_CLASS_NAME =
-      "libcore.util.NativeAllocationRegistry";
-  private static final String NATIVE_ALLOCATION_CLEANER_THUNK_CLASS_NAME =
-      "libcore.util.NativeAllocationRegistry$CleanerThunk";
+	private static final String NATIVE_ALLOCATION_CLASS_NAME =
+			"libcore.util.NativeAllocationRegistry";
+	private static final String NATIVE_ALLOCATION_CLEANER_THUNK_CLASS_NAME =
+			"libcore.util.NativeAllocationRegistry$CleanerThunk";
 
-  private static final int GENERATION = 1;//NativeAllocationRegistry->Object
+	private static final int GENERATION = 1;//NativeAllocationRegistry->Object
+	private boolean supported;
+	private long nativeAllocationClassId;
+	private long nativeAllocationThunkClassId;
+	private ClassCounter nativeAllocationCounter;
+	private NativeAllocationRegistryLeakDetector() {
+	}
 
-  private NativeAllocationRegistryLeakDetector() {}
+	public NativeAllocationRegistryLeakDetector(HeapGraph heapGraph) {
+		if (VERBOSE_LOG) {
+			KLog.i(TAG, "run isLeak");
+		}
 
-  private boolean supported;
-  private long nativeAllocationClassId;
-  private long nativeAllocationThunkClassId;
-  private ClassCounter nativeAllocationCounter;
+		//native allocation
+		HeapObject.HeapClass nativeAllocationHeapClass =
+				heapGraph.findClassByName(NATIVE_ALLOCATION_CLASS_NAME);
+		HeapObject.HeapClass nativeAllocationThunkHeapClass =
+				heapGraph.findClassByName(NATIVE_ALLOCATION_CLEANER_THUNK_CLASS_NAME);
+		if (nativeAllocationHeapClass != null) {
+			nativeAllocationClassId = nativeAllocationHeapClass.getObjectId();
+		} else {
+			supported = false;
+		}
+		if (nativeAllocationThunkHeapClass != null) {
+			nativeAllocationThunkClassId = nativeAllocationThunkHeapClass.getObjectId();
+		} else {
+			supported = false;
+		}
+		nativeAllocationCounter = new ClassCounter();
+		supported = true;
+	}
 
-  public NativeAllocationRegistryLeakDetector(HeapGraph heapGraph) {
-    if (VERBOSE_LOG) {
-      KLog.i(TAG, "run isLeak");
-    }
+	@Override
+	public boolean isSubClass(long classId) {
+		if (!supported) {
+			return false;
+		}
+		long id = ClassHierarchyFetcher.getIdOfGeneration(classId, generation());
+		return id == nativeAllocationClassId || id == nativeAllocationThunkClassId;
+	}
 
-    //native allocation
-    HeapObject.HeapClass nativeAllocationHeapClass =
-        heapGraph.findClassByName(NATIVE_ALLOCATION_CLASS_NAME);
-    HeapObject.HeapClass nativeAllocationThunkHeapClass =
-        heapGraph.findClassByName(NATIVE_ALLOCATION_CLEANER_THUNK_CLASS_NAME);
-    if (nativeAllocationHeapClass != null) {
-      nativeAllocationClassId = nativeAllocationHeapClass.getObjectId();
-    } else {
-      supported = false;
-    }
-    if (nativeAllocationThunkHeapClass != null) {
-      nativeAllocationThunkClassId = nativeAllocationThunkHeapClass.getObjectId();
-    } else {
-      supported = false;
-    }
-    nativeAllocationCounter = new ClassCounter();
-    supported = true;
-  }
+	@Override
+	public long classId() {
+		return nativeAllocationClassId;
+	}
 
-  @Override
-  public boolean isSubClass(long classId) {
-    if (!supported) {
-      return false;
-    }
-    long id = ClassHierarchyFetcher.getIdOfGeneration(classId, generation());
-    return id == nativeAllocationClassId || id == nativeAllocationThunkClassId;
-  }
+	@Override
+	public String className() {
+		return NATIVE_ALLOCATION_CLASS_NAME;
+	}
 
-  @Override
-  public long classId() {
-    return nativeAllocationClassId;
-  }
+	@Override
+	public String leakReason() {
+		return "NativeAllocation";
+	}
 
-  @Override
-  public String className() {
-    return NATIVE_ALLOCATION_CLASS_NAME;
-  }
+	@Override
+	public boolean isLeak(HeapObject.HeapInstance instance) {
+		if (!supported) {
+			return false;
+		}
+		nativeAllocationCounter.instancesCount++;
+		return false;
+	}
 
-  @Override
-  public String leakReason() {
-    return "NativeAllocation";
-  }
+	@Override
+	public ClassCounter instanceCount() {
+		return nativeAllocationCounter;
+	}
 
-  @Override
-  public boolean isLeak(HeapObject.HeapInstance instance) {
-    if (!supported) {
-      return false;
-    }
-    nativeAllocationCounter.instancesCount++;
-    return false;
-  }
+	@Override
+	public int generation() {
+		return GENERATION;
+	}
 
-  @Override
-  public ClassCounter instanceCount() {
-    return nativeAllocationCounter;
-  }
-
-  @Override
-  public int generation() {
-    return GENERATION;
-  }
-
-  @Override
-  public Class<?> clazz() {
-    //not exists in sdk
-    return null;
-  }
+	@Override
+	public Class<?> clazz() {
+		//not exists in sdk
+		return null;
+	}
 }

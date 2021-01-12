@@ -1,13 +1,13 @@
 package com.kwai.koom.javaoom.dump;
 
-import java.io.IOException;
-
 import android.os.Build;
 import android.os.Debug;
 
 import com.kwai.koom.javaoom.KOOMEnableChecker;
 import com.kwai.koom.javaoom.common.KGlobalConfig;
 import com.kwai.koom.javaoom.common.KLog;
+
+import java.io.IOException;
 
 
 /**
@@ -31,99 +31,99 @@ import com.kwai.koom.javaoom.common.KLog;
  */
 public class ForkJvmHeapDumper implements HeapDumper {
 
-  private static final String TAG = "ForkJvmHeapDumper";
+	private static final String TAG = "ForkJvmHeapDumper";
 
-  private boolean soLoaded;
+	private boolean soLoaded;
 
-  public ForkJvmHeapDumper() {
-    soLoaded = KGlobalConfig.getSoLoader().loadLib("koom-java");
-    if (soLoaded) {
-      initForkDump();
-    }
-  }
+	public ForkJvmHeapDumper() {
+		soLoaded = KGlobalConfig.getSoLoader().loadLib("koom-java");
+		if (soLoaded) {
+			initForkDump();
+		}
+	}
 
-  @Override
-  public boolean dump(String path) {
-    KLog.i(TAG, "dump " + path);
-    if (!soLoaded) {
-      KLog.e(TAG, "dump failed caused by so not loaded!");
-      return false;
-    }
+	/**
+	 * Dump hprof with hidden c++ API
+	 */
+	public static native boolean dumpHprofDataNative(String fileName);
 
-    if (!KOOMEnableChecker.get().isVersionPermit()) {
-      KLog.e(TAG, "dump failed caused by version net permitted!");
-      return false;
-    }
+	@Override
+	public boolean dump(String path) {
+		KLog.i(TAG, "dump " + path);
+		if (!soLoaded) {
+			KLog.e(TAG, "dump failed caused by so not loaded!");
+			return false;
+		}
 
-    if (!KOOMEnableChecker.get().isSpaceEnough()) {
-      KLog.e(TAG, "dump failed caused by disk space not enough!");
-      return false;
-    }
+		if (!KOOMEnableChecker.get().isVersionPermit()) {
+			KLog.e(TAG, "dump failed caused by version net permitted!");
+			return false;
+		}
 
-    // Compatible with Android 11
-    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-      return dumpHprofDataNative(path);
-    }
+		if (!KOOMEnableChecker.get().isSpaceEnough()) {
+			KLog.e(TAG, "dump failed caused by disk space not enough!");
+			return false;
+		}
 
-    boolean dumpRes = false;
-    try {
-      int pid = trySuspendVMThenFork();
-      if (pid == 0) {
-        Debug.dumpHprofData(path);
-        KLog.i(TAG, "notifyDumped:" + dumpRes);
-        //System.exit(0);
-        exitProcess();
-      } else {
-        resumeVM();
-        dumpRes = waitDumping(pid);
-        KLog.i(TAG, "hprof pid:" + pid + " dumped: " + path);
-      }
+		// Compatible with Android 11
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+			return dumpHprofDataNative(path);
+		}
 
-    } catch (IOException e) {
-      e.printStackTrace();
-      KLog.e(TAG, "dump failed caused by IOException!");
-    }
-    return dumpRes;
-  }
+		boolean dumpRes = false;
+		try {
+			int pid = trySuspendVMThenFork();
+			if (pid == 0) {
+				Debug.dumpHprofData(path);
+				KLog.i(TAG, "notifyDumped:" + dumpRes);
+				//System.exit(0);
+				exitProcess();
+			} else {
+				resumeVM();
+				dumpRes = waitDumping(pid);
+				KLog.i(TAG, "hprof pid:" + pid + " dumped: " + path);
+			}
 
-  private boolean waitDumping(int pid) {
-    waitPid(pid);
-    return true;
-  }
+		} catch (IOException e) {
+			e.printStackTrace();
+			KLog.e(TAG, "dump failed caused by IOException!");
+		}
+		return dumpRes;
+	}
 
-  /**
-   * Init before do dump.
-   *
-   * @return init result
-   */
-  private native void initForkDump();
+	private boolean waitDumping(int pid) {
+		waitPid(pid);
+		return true;
+	}
 
-  /**
-   * First do suspend vm, then do fork.
-   *
-   * @return result of fork
-   */
-  private native int trySuspendVMThenFork();
+	/**
+	 * Init before do dump.
+	 *
+	 * @return init result
+	 */
+	private native void initForkDump();
 
-  /**
-   * Wait process exit.
-   *
-   * @param pid waited process.
-   */
-  private native void waitPid(int pid);
+	/**
+	 * First do suspend vm, then do fork.
+	 *
+	 * @return result of fork
+	 */
+	private native int trySuspendVMThenFork();
 
-  /**
-   * Exit current process.
-   */
-  private native void exitProcess();
+	/**
+	 * Wait process exit.
+	 *
+	 * @param pid waited process.
+	 */
+	private native void waitPid(int pid);
 
-  /**
-   * Resume the VM.
-   */
-  private native void resumeVM();
+	/**
+	 * Exit current process.
+	 */
+	private native void exitProcess();
 
-  /**
-   * Dump hprof with hidden c++ API
-   */
-  public static native boolean dumpHprofDataNative(String fileName);
+	/**
+	 * Resume the VM.
+	 */
+	private native void resumeVM();
 }

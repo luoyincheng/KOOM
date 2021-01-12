@@ -27,108 +27,107 @@ import com.kwai.koom.javaoom.common.KLog;
  */
 public class HeapMonitor implements Monitor {
 
-  private static final String TAG = "HeapMonitor";
+	private static final String TAG = "HeapMonitor";
 
-  private HeapThreshold heapThreshold;
-  private int currentTimes = 0;
+	private HeapThreshold heapThreshold;
+	private int currentTimes = 0;
+	private HeapStatus lastHeapStatus;
+	private volatile boolean started = false;
 
-  public HeapMonitor() {}
+	public HeapMonitor() {
+	}
 
-  @Override
-  public void setThreshold(Threshold threshold) {
-    if (!(threshold instanceof HeapThreshold)) {
-      throw new RuntimeException("Must be HeapThreshold!");
-    }
-    this.heapThreshold = (HeapThreshold) threshold;
-  }
+	@Override
+	public void setThreshold(Threshold threshold) {
+		if (!(threshold instanceof HeapThreshold)) {
+			throw new RuntimeException("Must be HeapThreshold!");
+		}
+		this.heapThreshold = (HeapThreshold) threshold;
+	}
 
-  @Override
-  public TriggerReason getTriggerReason() {
-    return TriggerReason.dumpReason(TriggerReason.DumpReason.HEAP_OVER_THRESHOLD);
-  }
+	@Override
+	public TriggerReason getTriggerReason() {
+		return TriggerReason.dumpReason(TriggerReason.DumpReason.HEAP_OVER_THRESHOLD);
+	}
 
-  @Override
-  public boolean isTrigger() {
-    if (!started) {
-      return false;
-    }
+	@Override
+	public boolean isTrigger() {
+		if (!started) {
+			return false;
+		}
 
-    HeapStatus heapStatus = currentHeapStatus();
+		HeapStatus heapStatus = currentHeapStatus();
 
-    if (heapStatus.isOverMaxThreshold) {
-      // 已达到最大阀值，强制触发trigger，防止后续出现大内存分配导致OOM进程Crash，无法触发trigger
-      KLog.i(TAG, "heap used is over max ratio, force trigger and over times reset to 0");
-      currentTimes = 0;
-      return true;
-    }
+		if (heapStatus.isOverMaxThreshold) {
+			// 已达到最大阀值，强制触发trigger，防止后续出现大内存分配导致OOM进程Crash，无法触发trigger
+			KLog.i(TAG, "heap used is over max ratio, force trigger and over times reset to 0");
+			currentTimes = 0;
+			return true;
+		}
 
-    if (heapStatus.isOverThreshold) {
-      KLog.i(TAG, "heap status used:" + heapStatus.used / KConstants.Bytes.MB
-              + ", max:" + heapStatus.max / KConstants.Bytes.MB
-              + ", last over times:" + currentTimes);
-      if (heapThreshold.ascending()) {
-        if (lastHeapStatus == null || heapStatus.used >= lastHeapStatus.used || heapStatus.isOverMaxThreshold) {
-          currentTimes++;
-        } else {
-          KLog.i(TAG, "heap status used is not ascending, and over times reset to 0");
-          currentTimes = 0;
-        }
-      } else {
-        currentTimes++;
-      }
-    } else {
-      currentTimes = 0;
-    }
+		if (heapStatus.isOverThreshold) {
+			KLog.i(TAG, "heap status used:" + heapStatus.used / KConstants.Bytes.MB
+					+ ", max:" + heapStatus.max / KConstants.Bytes.MB
+					+ ", last over times:" + currentTimes);
+			if (heapThreshold.ascending()) {
+				if (lastHeapStatus == null || heapStatus.used >= lastHeapStatus.used || heapStatus.isOverMaxThreshold) {
+					currentTimes++;
+				} else {
+					KLog.i(TAG, "heap status used is not ascending, and over times reset to 0");
+					currentTimes = 0;
+				}
+			} else {
+				currentTimes++;
+			}
+		} else {
+			currentTimes = 0;
+		}
 
-    lastHeapStatus = heapStatus;
-    return currentTimes >= heapThreshold.overTimes();
-  }
+		lastHeapStatus = heapStatus;
+		return currentTimes >= heapThreshold.overTimes();
+	}
 
-  private HeapStatus lastHeapStatus;
+	private HeapStatus currentHeapStatus() {
+		HeapStatus heapStatus = new HeapStatus();
+		heapStatus.max = Runtime.getRuntime().maxMemory();
+		heapStatus.used = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+		KLog.i(TAG, 100.0f * heapStatus.used / heapStatus.max + " " + heapThreshold.value());
+		float heapInPercent = 100.0f * heapStatus.used / heapStatus.max;
+		heapStatus.isOverThreshold = heapInPercent > heapThreshold.value();
+		heapStatus.isOverMaxThreshold = heapInPercent > heapThreshold.maxValue();
+		return heapStatus;
+	}
 
-  private HeapStatus currentHeapStatus() {
-    HeapStatus heapStatus = new HeapStatus();
-    heapStatus.max = Runtime.getRuntime().maxMemory();
-    heapStatus.used = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-    KLog.i(TAG, 100.0f * heapStatus.used / heapStatus.max + " " + heapThreshold.value());
-    float heapInPercent = 100.0f * heapStatus.used / heapStatus.max;
-    heapStatus.isOverThreshold = heapInPercent > heapThreshold.value();
-    heapStatus.isOverMaxThreshold = heapInPercent > heapThreshold.maxValue();
-    return heapStatus;
-  }
+	@Override
+	public MonitorType monitorType() {
+		return MonitorType.HEAP;
+	}
 
-  static class HeapStatus {
-    long max;
-    long used;
-    boolean isOverThreshold;
-    boolean isOverMaxThreshold;
-  }
+	@Override
+	public void start() {
+		started = true;
+		if (heapThreshold == null) {
+			heapThreshold = KGlobalConfig.getHeapThreshold();
+		}
+		KLog.i(TAG, "start HeapMonitor, HeapThreshold ratio:" + heapThreshold.value()
+				+ ", max over times: " + heapThreshold.overTimes());
+	}
 
-  @Override
-  public MonitorType monitorType() {
-    return MonitorType.HEAP;
-  }
+	@Override
+	public void stop() {
+		KLog.i(TAG, "stop");
+		started = false;
+	}
 
-  private volatile boolean started = false;
+	@Override
+	public int pollInterval() {
+		return heapThreshold.pollInterval();
+	}
 
-  @Override
-  public void start() {
-    started = true;
-    if (heapThreshold == null) {
-      heapThreshold = KGlobalConfig.getHeapThreshold();
-    }
-    KLog.i(TAG, "start HeapMonitor, HeapThreshold ratio:" + heapThreshold.value()
-        + ", max over times: " + heapThreshold.overTimes());
-  }
-
-  @Override
-  public void stop() {
-    KLog.i(TAG, "stop");
-    started = false;
-  }
-
-  @Override
-  public int pollInterval() {
-    return heapThreshold.pollInterval();
-  }
+	static class HeapStatus {
+		long max;
+		long used;
+		boolean isOverThreshold;
+		boolean isOverMaxThreshold;
+	}
 }

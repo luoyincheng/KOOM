@@ -23,17 +23,17 @@ import com.kwai.koom.javaoom.common.KConstants;
  */
 public class ByteArrayLeakMaker extends LeakMaker<ByteArrayLeakMaker.ByteArrayHolder> {
 
-  @Override
-  public void startLeak(Context context) {
-    uselessObjectList.add(new ByteArrayHolder());
-  }
+	@Override
+	public void startLeak(Context context) {
+		uselessObjectList.add(new ByteArrayHolder());
+	}
 
-  public static class ByteArrayHolder {
-    private byte[] array;
+	public static class ByteArrayHolder {
+		private byte[] array;
 
-    public ByteArrayHolder() {
-      array = new byte[KConstants.ArrayThreshold.DEFAULT_BIG_PRIMITIVE_ARRAY + 1];
-    }
-  }
+		public ByteArrayHolder() {
+			array = new byte[KConstants.ArrayThreshold.DEFAULT_BIG_PRIMITIVE_ARRAY + 1];
+		}
+	}
 
 }

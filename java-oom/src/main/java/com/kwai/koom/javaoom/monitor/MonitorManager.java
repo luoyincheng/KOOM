@@ -22,44 +22,44 @@ import java.util.List;
  */
 public class MonitorManager {
 
-  private List<Monitor> monitors;
-  private MonitorThread monitorThread;
+	private List<Monitor> monitors;
+	private MonitorThread monitorThread;
 
-  public MonitorManager() {
-    monitors = new ArrayList<>();
-    monitorThread = new MonitorThread();
-  }
+	public MonitorManager() {
+		monitors = new ArrayList<>();
+		monitorThread = new MonitorThread();
+	}
 
-  public void start() {
-    monitorThread.start(monitors);
-  }
+	public void start() {
+		monitorThread.start(monitors);
+	}
 
-  public void stop() {
-    for (Monitor monitor : monitors) {
-      monitor.stop();
-    }
-    monitorThread.stop();
-  }
+	public void stop() {
+		for (Monitor monitor : monitors) {
+			monitor.stop();
+		}
+		monitorThread.stop();
+	}
 
-  public void startMonitor(Monitor monitor) {
-    monitor.start();
-  }
+	public void startMonitor(Monitor monitor) {
+		monitor.start();
+	}
 
-  public void stopMonitor(Monitor monitor) {
-    monitor.stop();
-  }
+	public void stopMonitor(Monitor monitor) {
+		monitor.stop();
+	}
 
-  public void addMonitor(Monitor monitor) {
-    monitors.add(monitor);
-  }
+	public void addMonitor(Monitor monitor) {
+		monitors.add(monitor);
+	}
 
-  public void removeMonitor(Monitor monitor) {
-    monitors.remove(monitor);
-  }
+	public void removeMonitor(Monitor monitor) {
+		monitors.remove(monitor);
+	}
 
 
-  public void setTriggerListener(MonitorTriggerListener monitorTriggerListener) {
-    monitorThread.setMonitorTriggerListener(monitorTriggerListener);
-  }
+	public void setTriggerListener(MonitorTriggerListener monitorTriggerListener) {
+		monitorThread.setMonitorTriggerListener(monitorTriggerListener);
+	}
 
 }

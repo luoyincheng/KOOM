@@ -1,9 +1,9 @@
 package com.kwai.koom.demo.leaked;
 
+import android.content.Context;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import android.content.Context;
 
 /**
  * Copyright 2020 Kwai, Inc. All rights reserved.
@@ -23,20 +23,19 @@ import android.content.Context;
  * @author Rui Li <lirui05@kuaishou.com>
  */
 public abstract class LeakMaker<T> {
-  List<T> uselessObjectList = new ArrayList<>();
+	private static List<LeakMaker> leakMakerList = new ArrayList<>();
+	List<T> uselessObjectList = new ArrayList<>();
 
-  abstract void startLeak(Context context);
+	public static void makeLeak(Context context) {
+		leakMakerList.add(new ActivityLeakMaker());
+		leakMakerList.add(new BitmapLeakMaker());
+		leakMakerList.add(new ByteArrayLeakMaker());
+		leakMakerList.add(new FragmentLeakMaker());
+		leakMakerList.add(new StringLeakMaker());
+		for (LeakMaker leakMaker : leakMakerList) {
+			leakMaker.startLeak(context);
+		}
+	}
 
-  private static List<LeakMaker> leakMakerList = new ArrayList<>();
-
-  public static void makeLeak(Context context) {
-    leakMakerList.add(new ActivityLeakMaker());
-    leakMakerList.add(new BitmapLeakMaker());
-    leakMakerList.add(new ByteArrayLeakMaker());
-    leakMakerList.add(new FragmentLeakMaker());
-    leakMakerList.add(new StringLeakMaker());
-    for (LeakMaker leakMaker : leakMakerList) {
-      leakMaker.startLeak(context);
-    }
-  }
+	abstract void startLeak(Context context);
 }

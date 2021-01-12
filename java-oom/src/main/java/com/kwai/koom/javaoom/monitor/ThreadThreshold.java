@@ -19,37 +19,37 @@ package com.kwai.koom.javaoom.monitor;
  */
 public class ThreadThreshold implements Threshold {
 
-  private static final int DEFAULT_POLL_INTERVAL = 15000;
-  private static final int DEFAULT_OVER_TIMES = 3;
-  private static final int DEFAULT_THREAD_COUNT = 800;
+	private static final int DEFAULT_POLL_INTERVAL = 15000;
+	private static final int DEFAULT_OVER_TIMES = 3;
+	private static final int DEFAULT_THREAD_COUNT = 800;
 
-  @Override
-  public float value() {
-    return DEFAULT_THREAD_COUNT;
-  }
+	@Override
+	public float value() {
+		return DEFAULT_THREAD_COUNT;
+	}
 
-  @Override
-  public float maxValue() {
-    return 0;
-  }
+	@Override
+	public float maxValue() {
+		return 0;
+	}
 
-  @Override
-  public int overTimes() {
-    return DEFAULT_OVER_TIMES;
-  }
+	@Override
+	public int overTimes() {
+		return DEFAULT_OVER_TIMES;
+	}
 
-  @Override
-  public ThresholdValueType valueType() {
-    return ThresholdValueType.COUNT;
-  }
+	@Override
+	public ThresholdValueType valueType() {
+		return ThresholdValueType.COUNT;
+	}
 
-  @Override
-  public boolean ascending() {
-    return true;
-  }
+	@Override
+	public boolean ascending() {
+		return true;
+	}
 
-  @Override
-  public int pollInterval() {
-    return DEFAULT_POLL_INTERVAL;
-  }
+	@Override
+	public int pollInterval() {
+		return DEFAULT_POLL_INTERVAL;
+	}
 }

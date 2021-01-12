@@ -19,14 +19,14 @@ package com.kwai.koom.javaoom;
  */
 public interface KOOMProgressListener {
 
-  void onProgress(Progress progress);
+	void onProgress(Progress progress);
 
-  enum Progress {
-    HEAP_DUMP_START,
-    HEAP_DUMPED,
-    HEAP_DUMP_FAILED,
-    HEAP_ANALYSIS_START,
-    HEAP_ANALYSIS_DONE,
-    HEAP_ANALYSIS_FAILED
-  }
+	enum Progress {
+		HEAP_DUMP_START,
+		HEAP_DUMPED,
+		HEAP_DUMP_FAILED,
+		HEAP_ANALYSIS_START,
+		HEAP_ANALYSIS_DONE,
+		HEAP_ANALYSIS_FAILED
+	}
 }

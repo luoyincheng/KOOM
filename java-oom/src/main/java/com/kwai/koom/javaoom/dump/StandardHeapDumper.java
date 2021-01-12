@@ -1,8 +1,8 @@
 package com.kwai.koom.javaoom.dump;
 
-import java.io.IOException;
-
 import android.os.Debug;
+
+import java.io.IOException;
 
 /**
  * Copyright 2020 Kwai, Inc. All rights reserved.
@@ -23,14 +23,14 @@ import android.os.Debug;
  */
 public class StandardHeapDumper implements HeapDumper {
 
-  @Override
-  public boolean dump(String path) {
-    try {
-      Debug.dumpHprofData(path);
-    } catch (IOException e) {
-      e.printStackTrace();
-      return false;
-    }
-    return true;
-  }
+	@Override
+	public boolean dump(String path) {
+		try {
+			Debug.dumpHprofData(path);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
 }

@@ -1,13 +1,12 @@
 package com.kwai.koom.javaoom.dump;
 
-import java.io.IOException;
-
 import android.os.Debug;
-import android.util.Log;
 
 import com.kwai.koom.javaoom.KOOMEnableChecker;
 import com.kwai.koom.javaoom.common.KGlobalConfig;
 import com.kwai.koom.javaoom.common.KLog;
+
+import java.io.IOException;
 
 /**
  * Copyright 2020 Kwai, Inc. All rights reserved.
@@ -31,45 +30,45 @@ import com.kwai.koom.javaoom.common.KLog;
  */
 public class StripHprofHeapDumper implements HeapDumper {
 
-  private static final String TAG = "StripHprofHeapDumper";
+	private static final String TAG = "StripHprofHeapDumper";
 
-  private boolean soLoaded;
+	private boolean soLoaded;
 
-  public StripHprofHeapDumper() {
-    soLoaded = KGlobalConfig.getSoLoader().loadLib("koom-java");
-    if (soLoaded) {
-      initStripDump();
-    }
-  }
+	public StripHprofHeapDumper() {
+		soLoaded = KGlobalConfig.getSoLoader().loadLib("koom-java");
+		if (soLoaded) {
+			initStripDump();
+		}
+	}
 
-  @Override
-  public boolean dump(String path) {
-    KLog.i(TAG, "dump " + path);
-    if (!soLoaded) {
-      KLog.e(TAG, "dump failed caused by so not loaded!");
-      return false;
-    }
+	@Override
+	public boolean dump(String path) {
+		KLog.i(TAG, "dump " + path);
+		if (!soLoaded) {
+			KLog.e(TAG, "dump failed caused by so not loaded!");
+			return false;
+		}
 
-    if (!KOOMEnableChecker.get().isVersionPermit()) {
-      KLog.e(TAG, "dump failed caused by version net permitted!");
-      return false;
-    }
+		if (!KOOMEnableChecker.get().isVersionPermit()) {
+			KLog.e(TAG, "dump failed caused by version net permitted!");
+			return false;
+		}
 
-    boolean dumpRes = false;
-    try {
-      hprofName(path);
-      Debug.dumpHprofData(path);
-      dumpRes = isStripSuccess();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+		boolean dumpRes = false;
+		try {
+			hprofName(path);
+			Debug.dumpHprofData(path);
+			dumpRes = isStripSuccess();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-    return dumpRes;
-  }
+		return dumpRes;
+	}
 
-  public native void initStripDump();
+	public native void initStripDump();
 
-  public native void hprofName(String name);
+	public native void hprofName(String name);
 
-  public native boolean isStripSuccess();
+	public native boolean isStripSuccess();
 }

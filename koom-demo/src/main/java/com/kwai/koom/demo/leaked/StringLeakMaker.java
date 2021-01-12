@@ -23,10 +23,10 @@ import com.kwai.koom.javaoom.common.KConstants;
  */
 public class StringLeakMaker extends LeakMaker<String> {
 
-  @Override
-  void startLeak(Context context) {
-    String largeStr = new String(new byte[KConstants.ArrayThreshold
-        .DEFAULT_BIG_PRIMITIVE_ARRAY + 1]);
-    uselessObjectList.add(largeStr);
-  }
+	@Override
+	void startLeak(Context context) {
+		String largeStr = new String(new byte[KConstants.ArrayThreshold
+				.DEFAULT_BIG_PRIMITIVE_ARRAY + 1]);
+		uselessObjectList.add(largeStr);
+	}
 }

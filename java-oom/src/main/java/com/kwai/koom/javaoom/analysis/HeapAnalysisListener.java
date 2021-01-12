@@ -18,18 +18,18 @@ package com.kwai.koom.javaoom.analysis;
  * @author Rui Li <lirui05@kuaishou.com>
  */
 public interface HeapAnalysisListener {
-  /**
-   * Callback on Heap Analyze is triggered.
-   */
-  void onHeapAnalysisTrigger();
+	/**
+	 * Callback on Heap Analyze is triggered.
+	 */
+	void onHeapAnalysisTrigger();
 
-  /**
-   * Callback on Heap Analyze is done.
-   */
-  void onHeapAnalyzed();
+	/**
+	 * Callback on Heap Analyze is done.
+	 */
+	void onHeapAnalyzed();
 
-  /**
-   * Callback on Heap Analyze is failed.
-   */
-  void onHeapAnalyzeFailed();
+	/**
+	 * Callback on Heap Analyze is failed.
+	 */
+	void onHeapAnalyzeFailed();
 }

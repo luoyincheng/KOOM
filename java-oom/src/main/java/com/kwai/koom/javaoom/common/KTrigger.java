@@ -22,23 +22,23 @@ import com.kwai.koom.javaoom.monitor.TriggerReason;
  * @author Rui Li <lirui05@kuaishou.com>
  */
 public interface KTrigger extends LifecycleObserver {
-  /**
-   * start the trigger, find a time to do trigger
-   */
-  void startTrack();
+	/**
+	 * start the trigger, find a time to do trigger
+	 */
+	void startTrack();
 
-  /**
-   * stop the trigger.
-   */
-  void stopTrack();
+	/**
+	 * stop the trigger.
+	 */
+	void stopTrack();
 
-  /**
-   * do trigger
-   */
-  void trigger(TriggerReason reason);
+	/**
+	 * do trigger
+	 */
+	void trigger(TriggerReason reason);
 
-  /**
-   * strategy of when to do trigger
-   */
-  KTriggerStrategy strategy();
+	/**
+	 * strategy of when to do trigger
+	 */
+	KTriggerStrategy strategy();
 }

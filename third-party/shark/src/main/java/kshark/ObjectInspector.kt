@@ -12,31 +12,31 @@ import kshark.ObjectInspector.Companion.invoke
  */
 interface ObjectInspector {
 
-  /**
-   * @see [ObjectInspector]
-   */
-  fun inspect(reporter: ObjectReporter)
-
-  companion object {
     /**
-     * Utility function to create a [ObjectInspector] from the passed in [block] lambda instead of
-     * using the anonymous `object : OnHeapAnalyzedListener` syntax.
-     *
-     * Usage:
-     *
-     * ```kotlin
-     * val inspector = ObjectInspector { reporter ->
-     *
-     * }
-     * ```
+     * @see [ObjectInspector]
      */
-    inline operator fun invoke(crossinline block: (ObjectReporter) -> Unit): ObjectInspector =
-        object : ObjectInspector {
-          override fun inspect(
-              reporter: ObjectReporter
-          ) {
-            block(reporter)
-          }
-        }
-  }
+    fun inspect(reporter: ObjectReporter)
+
+    companion object {
+        /**
+         * Utility function to create a [ObjectInspector] from the passed in [block] lambda instead of
+         * using the anonymous `object : OnHeapAnalyzedListener` syntax.
+         *
+         * Usage:
+         *
+         * ```kotlin
+         * val inspector = ObjectInspector { reporter ->
+         *
+         * }
+         * ```
+         */
+        inline operator fun invoke(crossinline block: (ObjectReporter) -> Unit): ObjectInspector =
+                object : ObjectInspector {
+                    override fun inspect(
+                            reporter: ObjectReporter
+                    ) {
+                        block(reporter)
+                    }
+                }
+    }
 }

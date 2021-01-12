@@ -19,43 +19,42 @@ package com.kwai.koom.javaoom.monitor;
  */
 public class TriggerReason {
 
-  public enum DumpReason {
-    MANUAL_TRIGGER,
-    MANUAL_TRIGGER_ON_CRASH,
-    HEAP_OVER_THRESHOLD,
-    HEAP_THRASHING_HEAVILY,
-    HEAP_OOM_CRASH,
-    FD_OVER_THRESHOLD,
-    FD_OOM_CRASH,
-    THREAD_OVER_THRESHOLD,
-    THREAD_OOM_CRASH,
-  }
+	private static TriggerReason reason;
+	public DumpReason dumpReason;
+	public AnalysisReason analysisReason;
 
-  public enum AnalysisReason {
-    RIGHT_NOW,
-    REANALYSIS,
-    TEST
-  }
+	private static TriggerReason getTriggerReason() {
+		if (reason == null) {
+			reason = new TriggerReason();
+		}
+		return reason;
+	}
 
-  public DumpReason dumpReason;
-  public AnalysisReason analysisReason;
+	public static TriggerReason dumpReason(DumpReason dumpReason) {
+		getTriggerReason().dumpReason = dumpReason;
+		return reason;
+	}
 
-  private static TriggerReason reason;
+	public static TriggerReason analysisReason(AnalysisReason analysis) {
+		getTriggerReason().analysisReason = analysis;
+		return reason;
+	}
 
-  private static TriggerReason getTriggerReason() {
-    if (reason == null) {
-      reason = new TriggerReason();
-    }
-    return reason;
-  }
+	public enum DumpReason {
+		MANUAL_TRIGGER,
+		MANUAL_TRIGGER_ON_CRASH,
+		HEAP_OVER_THRESHOLD,
+		HEAP_THRASHING_HEAVILY,
+		HEAP_OOM_CRASH,
+		FD_OVER_THRESHOLD,
+		FD_OOM_CRASH,
+		THREAD_OVER_THRESHOLD,
+		THREAD_OOM_CRASH,
+	}
 
-  public static TriggerReason dumpReason(DumpReason dumpReason) {
-    getTriggerReason().dumpReason = dumpReason;
-    return reason;
-  }
-
-  public static TriggerReason analysisReason(AnalysisReason analysis) {
-    getTriggerReason().analysisReason = analysis;
-    return reason;
-  }
+	public enum AnalysisReason {
+		RIGHT_NOW,
+		REANALYSIS,
+		TEST
+	}
 }

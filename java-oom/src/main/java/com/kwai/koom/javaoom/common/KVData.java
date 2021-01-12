@@ -23,43 +23,43 @@ import android.content.SharedPreferences;
  */
 public class KVData {
 
-  private static boolean inited;
-  private static SharedPreferences spTriggers;
-  private static SharedPreferences spLaunchTime;
+	private static boolean inited;
+	private static SharedPreferences spTriggers;
+	private static SharedPreferences spLaunchTime;
 
-  public static void init() {
-    Application application = KGlobalConfig.getApplication();
-    spTriggers = application.getSharedPreferences(KConstants.SP
-        .TRIGGER_TIMES_NAME, Context.MODE_PRIVATE);
-    spLaunchTime = application.getSharedPreferences(KConstants.SP
-        .FIRST_LAUNCH_TIME_NAME, Context.MODE_PRIVATE);
-    inited = true;
-  }
+	public static void init() {
+		Application application = KGlobalConfig.getApplication();
+		spTriggers = application.getSharedPreferences(KConstants.SP
+				.TRIGGER_TIMES_NAME, Context.MODE_PRIVATE);
+		spLaunchTime = application.getSharedPreferences(KConstants.SP
+				.FIRST_LAUNCH_TIME_NAME, Context.MODE_PRIVATE);
+		inited = true;
+	}
 
-  public static void addTriggerTime(String version) {
-    if (!inited) {
-      init();
-    }
-    int times = getTriggerTimes(version);
-    spTriggers.edit().putInt(version, times + 1).apply();
-  }
+	public static void addTriggerTime(String version) {
+		if (!inited) {
+			init();
+		}
+		int times = getTriggerTimes(version);
+		spTriggers.edit().putInt(version, times + 1).apply();
+	}
 
-  public static int getTriggerTimes(String version) {
-    if (!inited) {
-      init();
-    }
-    return spTriggers.getInt(version, 0);
-  }
+	public static int getTriggerTimes(String version) {
+		if (!inited) {
+			init();
+		}
+		return spTriggers.getInt(version, 0);
+	}
 
-  public static long firstLaunchTime(String version) {
-    if (!inited) {
-      init();
-    }
-    long time = spLaunchTime.getLong(version, 0);
-    if (time == 0) {
-      time = System.currentTimeMillis();
-      spLaunchTime.edit().putLong(version, time).apply();
-    }
-    return time;
-  }
+	public static long firstLaunchTime(String version) {
+		if (!inited) {
+			init();
+		}
+		long time = spLaunchTime.getLong(version, 0);
+		if (time == 0) {
+			time = System.currentTimeMillis();
+			spLaunchTime.edit().putLong(version, time).apply();
+		}
+		return time;
+	}
 }

@@ -18,5 +18,5 @@ package com.kwai.koom.javaoom.common;
  * @author Rui Li <lirui05@kuaishou.com>
  */
 public interface KSoLoader {
-  boolean loadLib(String libName);
+	boolean loadLib(String libName);
 }

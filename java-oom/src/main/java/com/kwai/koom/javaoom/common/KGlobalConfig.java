@@ -1,11 +1,11 @@
 package com.kwai.koom.javaoom.common;
 
-import java.io.File;
-
 import android.app.Application;
 
 import com.kwai.koom.javaoom.monitor.HeapThreshold;
 import com.kwai.koom.javaoom.report.DefaultRunningInfoFetcher;
+
+import java.io.File;
 
 /**
  * Copyright 2020 Kwai, Inc. All rights reserved.
@@ -26,95 +26,90 @@ import com.kwai.koom.javaoom.report.DefaultRunningInfoFetcher;
  */
 public class KGlobalConfig {
 
-  private static KGlobalConfig globalConfig;
+	static final String KOOM_DIR = "koom";
+	static final String HPROF_DIR = "hprof";
+	static final String REPORT_DIR = "report";
+	private static KGlobalConfig globalConfig;
+	private static String rootDir;
+	private static String reportDir;
+	private static String hprofDir;
+	private Application application;
+	private KConfig kConfig;
+	private RunningInfoFetcher runningInfoFetcher;
+	private KSoLoader soLoader;
 
-  private KGlobalConfig() {}
+	private KGlobalConfig() {
+	}
 
-  private Application application;
+	private static KGlobalConfig getGlobalConfig() {
+		return globalConfig == null ? globalConfig = new KGlobalConfig() : globalConfig;
+	}
 
-  private static KGlobalConfig getGlobalConfig() {
-    return globalConfig == null ? globalConfig = new KGlobalConfig() : globalConfig;
-  }
+	public static Application getApplication() {
+		return getGlobalConfig().application;
+	}
 
-  public void setApplicationInternal(Application application) {
-    this.application = application;
-    this.runningInfoFetcher = new DefaultRunningInfoFetcher(application);
-  }
+	public static void setApplication(Application application) {
+		getGlobalConfig().setApplicationInternal(application);
+	}
 
-  public static void setApplication(Application application) {
-    getGlobalConfig().setApplicationInternal(application);
-  }
+	public static KConfig getKConfig() {
+		return getGlobalConfig().kConfig;
+	}
 
-  public static Application getApplication() {
-    return getGlobalConfig().application;
-  }
+	public static void setKConfig(KConfig kConfig) {
+		getGlobalConfig().setKConfigInternal(kConfig);
+	}
 
-  private KConfig kConfig;
+	public static HeapThreshold getHeapThreshold() {
+		return getGlobalConfig().kConfig.getHeapThreshold();
+	}
 
-  public static void setKConfig(KConfig kConfig) {
-    getGlobalConfig().setKConfigInternal(kConfig);
-  }
+	public static String getRootDir() {
+		if (rootDir != null) {
+			return rootDir;
+		}
+		return rootDir = getGlobalConfig().kConfig.getRootDir();
+	}
 
-  public void setKConfigInternal(KConfig kConfig) {
-    this.kConfig = kConfig;
-  }
+	public static void setRootDir(String rootDir) {
+		getGlobalConfig().kConfig.setRootDir(rootDir);
+	}
 
-  public static KConfig getKConfig() {
-    return getGlobalConfig().kConfig;
-  }
+	public static String getReportDir() {
+		if (reportDir != null) {
+			return reportDir;
+		}
+		return reportDir = getRootDir() + File.separator + REPORT_DIR;
+	}
 
-  public static HeapThreshold getHeapThreshold() {
-    return getGlobalConfig().kConfig.getHeapThreshold();
-  }
+	public static String getHprofDir() {
+		if (hprofDir != null) {
+			return hprofDir;
+		}
+		return hprofDir = getRootDir() + File.separator + HPROF_DIR;
+	}
 
-  static final String KOOM_DIR = "koom";
-  static final String HPROF_DIR = "hprof";
-  static final String REPORT_DIR = "report";
+	public static RunningInfoFetcher getRunningInfoFetcher() {
+		return getGlobalConfig().runningInfoFetcher;
+	}
 
-  private static String rootDir;
-  private static String reportDir;
-  private static String hprofDir;
+	public static KSoLoader getSoLoader() {
+		KSoLoader kSoLoader = getGlobalConfig().soLoader;
+		return kSoLoader == null ? getGlobalConfig().soLoader = new DefaultKSoLoader() : kSoLoader;
+	}
 
-  public static void setRootDir(String rootDir) {
-    getGlobalConfig().kConfig.setRootDir(rootDir);
-  }
+	public static void setSoLoader(KSoLoader soLoader) {
+		getGlobalConfig().soLoader = soLoader;
+	}
 
-  public static String getRootDir() {
-    if (rootDir != null) {
-      return rootDir;
-    }
-    return rootDir = getGlobalConfig().kConfig.getRootDir();
-  }
+	public void setApplicationInternal(Application application) {
+		this.application = application;
+		this.runningInfoFetcher = new DefaultRunningInfoFetcher(application);
+	}
 
-  public static String getReportDir() {
-    if (reportDir != null) {
-      return reportDir;
-    }
-    return reportDir = getRootDir() + File.separator + REPORT_DIR;
-  }
-
-  public static String getHprofDir() {
-    if (hprofDir != null) {
-      return hprofDir;
-    }
-    return hprofDir = getRootDir() + File.separator + HPROF_DIR;
-  }
-
-  private RunningInfoFetcher runningInfoFetcher;
-
-  public static RunningInfoFetcher getRunningInfoFetcher() {
-    return getGlobalConfig().runningInfoFetcher;
-  }
-
-  private KSoLoader soLoader;
-
-  public static void setSoLoader(KSoLoader soLoader) {
-    getGlobalConfig().soLoader = soLoader;
-  }
-
-  public static KSoLoader getSoLoader() {
-    KSoLoader kSoLoader = getGlobalConfig().soLoader;
-    return kSoLoader == null ? getGlobalConfig().soLoader = new DefaultKSoLoader() : kSoLoader;
-  }
+	public void setKConfigInternal(KConfig kConfig) {
+		this.kConfig = kConfig;
+	}
 
 }

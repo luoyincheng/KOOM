@@ -3,7 +3,7 @@ package com.kwai.koom.javaoom;
 import android.app.Application;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
+
 import androidx.lifecycle.ProcessLifecycleOwner;
 
 import com.kwai.koom.javaoom.analysis.HeapAnalysisListener;
@@ -43,231 +43,229 @@ import java.io.File;
  */
 class KOOMInternal implements HeapDumpListener, HeapAnalysisListener {
 
-  private static final String TAG = "KOOM";
+	private static final String TAG = "KOOM";
 
-  private HeapDumpTrigger heapDumpTrigger;
-  private HeapAnalysisTrigger heapAnalysisTrigger;
+	private HeapDumpTrigger heapDumpTrigger;
+	private HeapAnalysisTrigger heapAnalysisTrigger;
 
-  private KOOMProgressListener kProgressListener;
+	private KOOMProgressListener kProgressListener;
+	private Handler koomHandler;
+	private boolean started;
+	private HprofUploader hprofUploader;
+	private HeapReportUploader heapReportUploader;
 
-  private KOOMInternal() {}
+	private KOOMInternal() {
+	}
 
-  public KOOMInternal(Application application) {
-    KUtils.startup();
+	public KOOMInternal(Application application) {
+		KUtils.startup();
 
-    buildConfig(application);
+		buildConfig(application);
 
-    heapDumpTrigger = new HeapDumpTrigger();
-    heapAnalysisTrigger = new HeapAnalysisTrigger();
+		heapDumpTrigger = new HeapDumpTrigger();
+		heapAnalysisTrigger = new HeapAnalysisTrigger();
 
-    ProcessLifecycleOwner.get().getLifecycle().addObserver(heapAnalysisTrigger);
-  }
+		ProcessLifecycleOwner.get().getLifecycle().addObserver(heapAnalysisTrigger);
+	}
 
-  private void buildConfig(Application application) {
-    //setApplication must be the first
-    KGlobalConfig.setApplication(application);
-    KGlobalConfig.setKConfig(KConfig.defaultConfig());
-  }
+	private void buildConfig(Application application) {
+		//setApplication must be the first
+		KGlobalConfig.setApplication(application);
+		KGlobalConfig.setKConfig(KConfig.defaultConfig());
+	}
 
-  public void setKConfig(KConfig kConfig) {
-    KGlobalConfig.setKConfig(kConfig);
-  }
+	public void setKConfig(KConfig kConfig) {
+		KGlobalConfig.setKConfig(kConfig);
+	}
 
-  private Handler koomHandler;
+	public void start() {
+		HandlerThread koomThread = new HandlerThread("koom");
+		koomThread.start();
+		koomHandler = new Handler(koomThread.getLooper());
+		startInKOOMThread();
+	}
 
-  public void start() {
-    HandlerThread koomThread = new HandlerThread("koom");
-    koomThread.start();
-    koomHandler = new Handler(koomThread.getLooper());
-    startInKOOMThread();
-  }
+	private void startInKOOMThread() {
+		koomHandler.postDelayed(this::startInternal, KConstants.Perf.START_DELAY);
+	}
 
-  private void startInKOOMThread() {
-    koomHandler.postDelayed(this::startInternal, KConstants.Perf.START_DELAY);
-  }
+	private void startInternal() {
+		if (started) {
+			KLog.i(TAG, "already started!");
+			return;
+		}
+		started = true;
 
-  private boolean started;
+		heapDumpTrigger.setHeapDumpListener(this);
+		heapAnalysisTrigger.setHeapAnalysisListener(this);
 
-  private void startInternal() {
-    if (started) {
-      KLog.i(TAG, "already started!");
-      return;
-    }
-    started = true;
+		if (KOOMEnableChecker.doCheck() != KOOMEnableChecker.Result.NORMAL) {
+			KLog.e(TAG, "koom start failed, check result: " + KOOMEnableChecker.doCheck());
+			return;
+		}
 
-    heapDumpTrigger.setHeapDumpListener(this);
-    heapAnalysisTrigger.setHeapAnalysisListener(this);
+		ReanalysisChecker reanalysisChecker = new ReanalysisChecker();
+		if (reanalysisChecker.detectReanalysisFile() != null) {
+			KLog.i(TAG, "detected reanalysis file");
+			heapAnalysisTrigger
+					.trigger(TriggerReason.analysisReason(TriggerReason.AnalysisReason.REANALYSIS));
+			return;
+		}
 
-    if (KOOMEnableChecker.doCheck() != KOOMEnableChecker.Result.NORMAL) {
-      KLog.e(TAG, "koom start failed, check result: " + KOOMEnableChecker.doCheck());
-      return;
-    }
+		heapDumpTrigger.startTrack();
+	}
 
-    ReanalysisChecker reanalysisChecker = new ReanalysisChecker();
-    if (reanalysisChecker.detectReanalysisFile() != null) {
-      KLog.i(TAG, "detected reanalysis file");
-      heapAnalysisTrigger
-          .trigger(TriggerReason.analysisReason(TriggerReason.AnalysisReason.REANALYSIS));
-      return;
-    }
+	public void stop() {
+		if (heapDumpTrigger != null) {
+			heapDumpTrigger.stopTrack();
+		}
+		if (heapAnalysisTrigger != null) {
+			heapAnalysisTrigger.stopTrack();
+		}
+	}
 
-    heapDumpTrigger.startTrack();
-  }
+	public void setSoLoader(KSoLoader soLoader) {
+		KGlobalConfig.setSoLoader(soLoader);
+	}
 
-  public void stop() {
-    if (heapDumpTrigger != null) {
-      heapDumpTrigger.stopTrack();
-    }
-    if (heapAnalysisTrigger != null) {
-      heapAnalysisTrigger.stopTrack();
-    }
-  }
+	public boolean setRootDir(String rootDir) {
+		File dir = new File(rootDir);
+		if (!dir.exists()) {
+			return false;
+		}
+		KGlobalConfig.setRootDir(rootDir);
+		return true;
+	}
 
-  public void setSoLoader(KSoLoader soLoader) {
-    KGlobalConfig.setSoLoader(soLoader);
-  }
+	public String getReportDir() {
+		return KGlobalConfig.getReportDir();
+	}
 
-  public boolean setRootDir(String rootDir) {
-    File dir = new File(rootDir);
-    if (!dir.exists()) {
-      return false;
-    }
-    KGlobalConfig.setRootDir(rootDir);
-    return true;
-  }
+	public String getHprofDir() {
+		return KGlobalConfig.getHprofDir();
+	}
 
-  public String getReportDir() {
-    return KGlobalConfig.getReportDir();
-  }
+	public void setHeapDumpTrigger(HeapDumpTrigger heapDumpTrigger) {
+		this.heapDumpTrigger = heapDumpTrigger;
+	}
 
-  public String getHprofDir() {
-    return KGlobalConfig.getHprofDir();
-  }
+	public void setHeapAnalysisTrigger(HeapAnalysisTrigger heapAnalysisTrigger) {
+		this.heapAnalysisTrigger = heapAnalysisTrigger;
+	}
 
-  public void setHeapDumpTrigger(HeapDumpTrigger heapDumpTrigger) {
-    this.heapDumpTrigger = heapDumpTrigger;
-  }
+	public void setProgressListener(KOOMProgressListener progressListener) {
+		this.kProgressListener = progressListener;
+	}
 
-  public void setHeapAnalysisTrigger(HeapAnalysisTrigger heapAnalysisTrigger) {
-    this.heapAnalysisTrigger = heapAnalysisTrigger;
-  }
+	public void changeProgress(KOOMProgressListener.Progress progress) {
+		if (kProgressListener != null) {
+			kProgressListener.onProgress(progress);
+		}
+	}
 
-  public void setProgressListener(KOOMProgressListener progressListener) {
-    this.kProgressListener = progressListener;
-  }
+	@Override
+	public void onHeapDumpTrigger(TriggerReason.DumpReason reason) {
+		KLog.i(TAG, "onHeapDumpTrigger");
+		changeProgress(KOOMProgressListener.Progress.HEAP_DUMP_START);
+	}
 
-  public void changeProgress(KOOMProgressListener.Progress progress) {
-    if (kProgressListener != null) {
-      kProgressListener.onProgress(progress);
-    }
-  }
+	@Override
+	public void onHeapDumped(TriggerReason.DumpReason reason) {
+		KLog.i(TAG, "onHeapDumped");
+		changeProgress(KOOMProgressListener.Progress.HEAP_DUMPED);
 
-  @Override
-  public void onHeapDumpTrigger(TriggerReason.DumpReason reason) {
-    KLog.i(TAG, "onHeapDumpTrigger");
-    changeProgress(KOOMProgressListener.Progress.HEAP_DUMP_START);
-  }
+		//Crash cases need to reanalyze next launch and not do analyze right now.
+		if (reason != TriggerReason.DumpReason.MANUAL_TRIGGER_ON_CRASH) {
+			heapAnalysisTrigger.startTrack();
+		} else {
+			KLog.i(TAG, "reanalysis next launch when trigger on crash");
+		}
+	}
 
-  @Override
-  public void onHeapDumped(TriggerReason.DumpReason reason) {
-    KLog.i(TAG, "onHeapDumped");
-    changeProgress(KOOMProgressListener.Progress.HEAP_DUMPED);
+	@Override
+	public void onHeapDumpFailed() {
+		changeProgress(KOOMProgressListener.Progress.HEAP_DUMP_FAILED);
+	}
 
-    //Crash cases need to reanalyze next launch and not do analyze right now.
-    if (reason != TriggerReason.DumpReason.MANUAL_TRIGGER_ON_CRASH) {
-      heapAnalysisTrigger.startTrack();
-    } else {
-      KLog.i(TAG, "reanalysis next launch when trigger on crash");
-    }
-  }
+	@Override
+	public void onHeapAnalysisTrigger() {
+		KLog.i(TAG, "onHeapAnalysisTrigger");
+		changeProgress(KOOMProgressListener.Progress.HEAP_ANALYSIS_START);
+	}
 
-  @Override
-  public void onHeapDumpFailed() {
-    changeProgress(KOOMProgressListener.Progress.HEAP_DUMP_FAILED);
-  }
+	@Override
+	public void onHeapAnalyzed() {
+		KLog.i(TAG, "onHeapAnalyzed");
+		changeProgress(KOOMProgressListener.Progress.HEAP_ANALYSIS_DONE);
+		uploadFiles(KHeapFile.getKHeapFile());
+	}
 
-  @Override
-  public void onHeapAnalysisTrigger() {
-    KLog.i(TAG, "onHeapAnalysisTrigger");
-    changeProgress(KOOMProgressListener.Progress.HEAP_ANALYSIS_START);
-  }
+	@Override
+	public void onHeapAnalyzeFailed() {
+		changeProgress(KOOMProgressListener.Progress.HEAP_ANALYSIS_FAILED);
+	}
 
-  @Override
-  public void onHeapAnalyzed() {
-    KLog.i(TAG, "onHeapAnalyzed");
-    changeProgress(KOOMProgressListener.Progress.HEAP_ANALYSIS_DONE);
-    uploadFiles(KHeapFile.getKHeapFile());
-  }
+	private void uploadFiles(KHeapFile heapFile) {
+		uploadHprof(heapFile.hprof);
+		uploadHeapReport(heapFile.report);
+	}
 
-  @Override
-  public void onHeapAnalyzeFailed() {
-    changeProgress(KOOMProgressListener.Progress.HEAP_ANALYSIS_FAILED);
-  }
+	private void uploadHprof(KHeapFile.Hprof hprof) {
+		if (hprofUploader != null) {
+			hprofUploader.upload(hprof.file());
+		}
+		//Do not save the hprof file by default.
+		if (hprofUploader == null || hprofUploader.deleteWhenUploaded()) {
+			KLog.i(TAG, "delete " + hprof.path);
+			hprof.delete();
+		}
+	}
 
-  private void uploadFiles(KHeapFile heapFile) {
-    uploadHprof(heapFile.hprof);
-    uploadHeapReport(heapFile.report);
-  }
+	private void uploadHeapReport(KHeapFile.Report report) {
+		if (heapReportUploader != null) {
+			heapReportUploader.upload(report.file());
+		}
+		//Save the report file by default.
+		if (heapReportUploader != null && heapReportUploader.deleteWhenUploaded()) {
+			KLog.i(TAG, "report delete");
+			report.delete();
+		}
+	}
 
-  private void uploadHprof(KHeapFile.Hprof hprof) {
-    if (hprofUploader != null) {
-      hprofUploader.upload(hprof.file());
-    }
-    //Do not save the hprof file by default.
-    if (hprofUploader == null || hprofUploader.deleteWhenUploaded()) {
-      KLog.i(TAG, "delete " + hprof.path);
-      hprof.delete();
-    }
-  }
+	public void setHprofUploader(HprofUploader hprofUploader) {
+		this.hprofUploader = hprofUploader;
+	}
 
-  private void uploadHeapReport(KHeapFile.Report report) {
-    if (heapReportUploader != null) {
-      heapReportUploader.upload(report.file());
-    }
-    //Save the report file by default.
-    if (heapReportUploader != null && heapReportUploader.deleteWhenUploaded()) {
-      KLog.i(TAG, "report delete");
-      report.delete();
-    }
-  }
+	public void setHeapReportUploader(HeapReportUploader heapReportUploader) {
+		this.heapReportUploader = heapReportUploader;
+	}
 
-  private HprofUploader hprofUploader;
-  private HeapReportUploader heapReportUploader;
+	private void manualTriggerInternal() {
+		if (!started) {
+			startInternal();
+		}
+		if (started) {
+			heapDumpTrigger.trigger(TriggerReason.dumpReason(
+					TriggerReason.DumpReason.MANUAL_TRIGGER));
+		}
+	}
 
-  public void setHprofUploader(HprofUploader hprofUploader) {
-    this.hprofUploader = hprofUploader;
-  }
-
-  public void setHeapReportUploader(HeapReportUploader heapReportUploader) {
-    this.heapReportUploader = heapReportUploader;
-  }
-
-  private void manualTriggerInternal() {
-    if (!started) {
-      startInternal();
-    }
-    if (started) {
-      heapDumpTrigger.trigger(TriggerReason.dumpReason(
-          TriggerReason.DumpReason.MANUAL_TRIGGER));
-    }
-  }
-
-  public void manualTrigger() {
-    koomHandler.post(this::manualTriggerInternal);
-  }
+	public void manualTrigger() {
+		koomHandler.post(this::manualTriggerInternal);
+	}
 
 
-  private void manualTriggerOnCrashInternal() {
-    if (!started) {
-      startInternal();
-    }
-    if (started) {
-      heapDumpTrigger.trigger(TriggerReason.dumpReason(
-          TriggerReason.DumpReason.MANUAL_TRIGGER_ON_CRASH));
-    }
-  }
+	private void manualTriggerOnCrashInternal() {
+		if (!started) {
+			startInternal();
+		}
+		if (started) {
+			heapDumpTrigger.trigger(TriggerReason.dumpReason(
+					TriggerReason.DumpReason.MANUAL_TRIGGER_ON_CRASH));
+		}
+	}
 
-  public void manualTriggerOnCrash() {
-    koomHandler.post(this::manualTriggerOnCrashInternal);
-  }
+	public void manualTriggerOnCrash() {
+		koomHandler.post(this::manualTriggerOnCrashInternal);
+	}
 }

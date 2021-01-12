@@ -4,7 +4,7 @@ package kshark
  * This class is kept to support backward compatible deserialization.
  */
 internal enum class LeakNodeStatus {
-  NOT_LEAKING,
-  LEAKING,
-  UNKNOWN;
+    NOT_LEAKING,
+    LEAKING,
+    UNKNOWN;
 }

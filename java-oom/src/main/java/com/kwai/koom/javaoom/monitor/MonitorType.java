@@ -18,5 +18,5 @@ package com.kwai.koom.javaoom.monitor;
  * @author Rui Li <lirui05@kuaishou.com>
  */
 public enum MonitorType {
-  HEAP, FD, THREAD
+	HEAP, FD, THREAD
 }

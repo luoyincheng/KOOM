@@ -25,96 +25,96 @@ import static com.kwai.koom.javaoom.common.KGlobalConfig.KOOM_DIR;
  */
 public class KConfig {
 
-  private HeapThreshold heapThreshold;
+	private HeapThreshold heapThreshold;
 
-  private String rootDir;
-  private String processName;
+	private String rootDir;
+	private String processName;
 
-  public KConfig(HeapThreshold heapThreshold, String rootDir, String processName) {
-    this.rootDir = rootDir;
-    this.processName = processName;
-    this.heapThreshold = heapThreshold;
-  }
+	public KConfig(HeapThreshold heapThreshold, String rootDir, String processName) {
+		this.rootDir = rootDir;
+		this.processName = processName;
+		this.heapThreshold = heapThreshold;
+	}
 
-  public HeapThreshold getHeapThreshold() {
-    return heapThreshold;
-  }
+	public static KConfig defaultConfig() {
+		return new KConfigBuilder().build();
+	}
 
-  public String getRootDir() {
-    return rootDir;
-  }
+	public HeapThreshold getHeapThreshold() {
+		return heapThreshold;
+	}
 
-  public void setRootDir(String rootDir) {
-    this.rootDir = rootDir;
-  }
+	public String getRootDir() {
+		return rootDir;
+	}
 
-  public String getProcessName() {
-    return processName;
-  }
+	public void setRootDir(String rootDir) {
+		this.rootDir = rootDir;
+	}
 
-  public static KConfig defaultConfig() {
-    return new KConfigBuilder().build();
-  }
+	public String getProcessName() {
+		return processName;
+	}
 
-  public static class KConfigBuilder {
+	public static class KConfigBuilder {
 
-    private float heapRatio;
-    private float heapMaxRatio;
-    private int heapOverTimes;
-    private int heapPollInterval;
+		private float heapRatio;
+		private float heapMaxRatio;
+		private int heapOverTimes;
+		private int heapPollInterval;
 
-    private String processName; //default main process name
+		private String processName; //default main process name
 
-    private String rootDir;
+		private String rootDir;
 
-    public KConfigBuilder() {
-      this.heapRatio = KConstants.HeapThreshold.getDefaultPercentRation();
-      this.heapMaxRatio = KConstants.HeapThreshold.getDefaultMaxPercentRation();
-      this.heapOverTimes = KConstants.HeapThreshold.OVER_TIMES;
-      this.heapPollInterval = KConstants.HeapThreshold.POLL_INTERVAL;
-      File cacheFile = KGlobalConfig.getApplication().getCacheDir();
-      //issue https://github.com/KwaiAppTeam/KOOM/issues/30
-      this.rootDir = cacheFile != null ?
-              cacheFile.getAbsolutePath() + File.separator + KOOM_DIR :
-              "/data/data/" + KGlobalConfig.getApplication().getPackageName() + "/cache/" + KOOM_DIR;
-      File dir = new File(rootDir);
-      if (!dir.exists()) dir.mkdirs();
-      this.processName = KGlobalConfig.getApplication().getPackageName();
-    }
+		public KConfigBuilder() {
+			this.heapRatio = KConstants.HeapThreshold.getDefaultPercentRation();
+			this.heapMaxRatio = KConstants.HeapThreshold.getDefaultMaxPercentRation();
+			this.heapOverTimes = KConstants.HeapThreshold.OVER_TIMES;
+			this.heapPollInterval = KConstants.HeapThreshold.POLL_INTERVAL;
+			File cacheFile = KGlobalConfig.getApplication().getCacheDir();
+			//issue https://github.com/KwaiAppTeam/KOOM/issues/30
+			this.rootDir = cacheFile != null ?
+					cacheFile.getAbsolutePath() + File.separator + KOOM_DIR :
+					"/data/data/" + KGlobalConfig.getApplication().getPackageName() + "/cache/" + KOOM_DIR;
+			File dir = new File(rootDir);
+			if (!dir.exists()) dir.mkdirs();
+			this.processName = KGlobalConfig.getApplication().getPackageName();
+		}
 
-    public KConfigBuilder heapRatio(float heapRatio) {
-      this.heapRatio = heapRatio;
-      return this;
-    }
+		public KConfigBuilder heapRatio(float heapRatio) {
+			this.heapRatio = heapRatio;
+			return this;
+		}
 
-    public KConfigBuilder heapMaxRatio(float heapMaxRatio) {
-      this.heapMaxRatio = heapMaxRatio;
-      return this;
-    }
+		public KConfigBuilder heapMaxRatio(float heapMaxRatio) {
+			this.heapMaxRatio = heapMaxRatio;
+			return this;
+		}
 
-    public KConfigBuilder heapOverTimes(int heapOverTimes) {
-      this.heapOverTimes = heapOverTimes;
-      return this;
-    }
+		public KConfigBuilder heapOverTimes(int heapOverTimes) {
+			this.heapOverTimes = heapOverTimes;
+			return this;
+		}
 
-    public KConfigBuilder rootDir(String dir) {
-      this.rootDir = dir;
-      return this;
-    }
+		public KConfigBuilder rootDir(String dir) {
+			this.rootDir = dir;
+			return this;
+		}
 
-    public KConfigBuilder processName(String name) {
-      this.processName = name;
-      return this;
-    }
+		public KConfigBuilder processName(String name) {
+			this.processName = name;
+			return this;
+		}
 
-    public KConfig build() {
-      if (heapRatio > heapMaxRatio) {
-        throw new RuntimeException("heapMaxRatio be greater than heapRatio");
-      }
-      HeapThreshold heapThreshold = new HeapThreshold(heapRatio,
-              heapMaxRatio, heapOverTimes, heapPollInterval);
-      return new KConfig(heapThreshold, this.rootDir, this.processName);
-    }
-  }
+		public KConfig build() {
+			if (heapRatio > heapMaxRatio) {
+				throw new RuntimeException("heapMaxRatio be greater than heapRatio");
+			}
+			HeapThreshold heapThreshold = new HeapThreshold(heapRatio,
+					heapMaxRatio, heapOverTimes, heapPollInterval);
+			return new KConfig(heapThreshold, this.rootDir, this.processName);
+		}
+	}
 
 }

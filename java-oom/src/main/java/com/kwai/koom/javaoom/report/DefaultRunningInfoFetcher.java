@@ -1,10 +1,5 @@
 package com.kwai.koom.javaoom.report;
 
-import java.lang.ref.WeakReference;
-import java.util.Map;
-
-import org.jetbrains.annotations.NotNull;
-
 import android.app.Activity;
 import android.app.Application;
 import android.content.pm.PackageManager;
@@ -14,6 +9,11 @@ import android.text.TextUtils;
 import com.kwai.koom.javaoom.common.KGlobalConfig;
 import com.kwai.koom.javaoom.common.KUtils;
 import com.kwai.koom.javaoom.common.RunningInfoFetcher;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.lang.ref.WeakReference;
+import java.util.Map;
 
 /**
  * Copyright 2020 Kwai, Inc. All rights reserved.
@@ -34,87 +34,86 @@ import com.kwai.koom.javaoom.common.RunningInfoFetcher;
  */
 public class DefaultRunningInfoFetcher implements RunningInfoFetcher {
 
-  String appVersion;
+	String appVersion;
+	private WeakReference<Activity> currentActivityWeakRef;
 
-  @Override
-  public String appVersion() {
-    if (!TextUtils.isEmpty(appVersion)) {
-      return appVersion;
-    }
-    try {
-      appVersion = KGlobalConfig.getApplication().getPackageManager()
-          .getPackageInfo(KGlobalConfig.getApplication().getPackageName(), 0)
-          .versionName;
-    } catch (PackageManager.NameNotFoundException e) {
-      e.printStackTrace();
-    }
-    return appVersion;
-  }
+	public DefaultRunningInfoFetcher(Application application) {
+		application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+			@Override
+			public void onActivityCreated(@NotNull Activity activity, Bundle savedInstanceState) {
+				updateCurrentActivityWeakRef(activity);
+			}
 
-  @Override
-  public String currentPage() {
-    return (currentActivityWeakRef == null || currentActivityWeakRef.get() == null) ? ""
-        : currentActivityWeakRef.get().getLocalClassName();
-  }
+			@Override
+			public void onActivityStarted(@NotNull Activity activity) {
+				updateCurrentActivityWeakRef(activity);
+			}
 
-  @Override
-  public Integer usageSeconds() {
-    return KUtils.usageSeconds();
-  }
+			@Override
+			public void onActivityResumed(@NotNull Activity activity) {
+				updateCurrentActivityWeakRef(activity);
+			}
 
-  @Override
-  public Map<String, String> ext() {
-    return null;
-  }
+			@Override
+			public void onActivityPaused(@NotNull Activity activity) {
+				updateCurrentActivityWeakRef(activity);
+			}
 
-  private WeakReference<Activity> currentActivityWeakRef;
+			@Override
+			public void onActivityStopped(@NotNull Activity activity) {
+				updateCurrentActivityWeakRef(activity);
+			}
 
-  private void updateCurrentActivityWeakRef(Activity activity) {
-    if (currentActivityWeakRef == null) {
-      currentActivityWeakRef = new WeakReference<>(activity);
-    } else {
-      currentActivityWeakRef = currentActivityWeakRef.get() == activity ?
-          currentActivityWeakRef : new WeakReference<>(activity);
-    }
-  }
+			@Override
+			public void onActivitySaveInstanceState(@NotNull Activity activity,
+			                                        @NotNull Bundle outState) {
+				updateCurrentActivityWeakRef(activity);
+			}
 
-  public DefaultRunningInfoFetcher(Application application) {
-    application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
-      @Override
-      public void onActivityCreated(@NotNull Activity activity, Bundle savedInstanceState) {
-        updateCurrentActivityWeakRef(activity);
-      }
+			@Override
+			public void onActivityDestroyed(@NotNull Activity activity) {
+				updateCurrentActivityWeakRef(activity);
+			}
+		});
+	}
 
-      @Override
-      public void onActivityStarted(@NotNull Activity activity) {
-        updateCurrentActivityWeakRef(activity);
-      }
+	@Override
+	public String appVersion() {
+		if (!TextUtils.isEmpty(appVersion)) {
+			return appVersion;
+		}
+		try {
+			appVersion = KGlobalConfig.getApplication().getPackageManager()
+					.getPackageInfo(KGlobalConfig.getApplication().getPackageName(), 0)
+					.versionName;
+		} catch (PackageManager.NameNotFoundException e) {
+			e.printStackTrace();
+		}
+		return appVersion;
+	}
 
-      @Override
-      public void onActivityResumed(@NotNull Activity activity) {
-        updateCurrentActivityWeakRef(activity);
-      }
+	@Override
+	public String currentPage() {
+		return (currentActivityWeakRef == null || currentActivityWeakRef.get() == null) ? ""
+				: currentActivityWeakRef.get().getLocalClassName();
+	}
 
-      @Override
-      public void onActivityPaused(@NotNull Activity activity) {
-        updateCurrentActivityWeakRef(activity);
-      }
+	@Override
+	public Integer usageSeconds() {
+		return KUtils.usageSeconds();
+	}
 
-      @Override
-      public void onActivityStopped(@NotNull Activity activity) {
-        updateCurrentActivityWeakRef(activity);
-      }
+	@Override
+	public Map<String, String> ext() {
+		return null;
+	}
 
-      @Override
-      public void onActivitySaveInstanceState(@NotNull Activity activity,
-          @NotNull Bundle outState) {
-        updateCurrentActivityWeakRef(activity);
-      }
-
-      @Override
-      public void onActivityDestroyed(@NotNull Activity activity) {
-        updateCurrentActivityWeakRef(activity);
-      }
-    });
-  }
+	private void updateCurrentActivityWeakRef(Activity activity) {
+		if (currentActivityWeakRef == null) {
+			currentActivityWeakRef = new WeakReference<>(activity);
+		} else {
+			currentActivityWeakRef = currentActivityWeakRef.get() == activity ?
+					currentActivityWeakRef : new WeakReference<>(activity);
+		}
+	}
 }

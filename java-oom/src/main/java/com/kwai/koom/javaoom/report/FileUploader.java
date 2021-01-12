@@ -21,19 +21,19 @@ import java.io.File;
  */
 public interface FileUploader {
 
-  /**
-   * Upload file.
-   *
-   * @param file heap related file
-   */
-  void upload(File file);
+	/**
+	 * Upload file.
+	 *
+	 * @param file heap related file
+	 */
+	void upload(File file);
 
-  /**
-   * Whether delete the file or not when upload is done.
-   *
-   * @return default true
-   */
-  default boolean deleteWhenUploaded() {
-    return true;
-  }
+	/**
+	 * Whether delete the file or not when upload is done.
+	 *
+	 * @return default true
+	 */
+	default boolean deleteWhenUploaded() {
+		return true;
+	}
 }

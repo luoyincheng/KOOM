@@ -1,6 +1,5 @@
 package com.kwai.koom.javaoom.analysis;
 
-import android.util.Log;
 import android.view.Window;
 
 import com.kwai.koom.javaoom.common.KLog;
@@ -27,61 +26,60 @@ import kshark.HeapObject;
  */
 public class WindowLeakDetector extends LeakDetector {
 
-  private static final String TAG = "WindowLeakDetector";
+	private static final String TAG = "WindowLeakDetector";
 
-  private static final String WINDOW_CLASS_NAME = "android.view.Window";
-  private static final int GENERATION = 1;//Window->Object
+	private static final String WINDOW_CLASS_NAME = "android.view.Window";
+	private static final int GENERATION = 1;//Window->Object
+	private long windowClassId;
+	private ClassCounter windowCounter;
+	private WindowLeakDetector() {
+	}
 
-  private WindowLeakDetector() {}
+	public WindowLeakDetector(HeapGraph heapGraph) {
+		//window
+		HeapObject.HeapClass windowClass = heapGraph.findClassByName(WINDOW_CLASS_NAME);
+		assert windowClass != null;
+		windowClassId = windowClass.getObjectId();
+		windowCounter = new ClassCounter();
+	}
 
-  private long windowClassId;
-  private ClassCounter windowCounter;
+	@Override
+	public long classId() {
+		return windowClassId;
+	}
 
-  public WindowLeakDetector(HeapGraph heapGraph) {
-    //window
-    HeapObject.HeapClass windowClass = heapGraph.findClassByName(WINDOW_CLASS_NAME);
-    assert windowClass != null;
-    windowClassId = windowClass.getObjectId();
-    windowCounter = new ClassCounter();
-  }
+	@Override
+	public String className() {
+		return WINDOW_CLASS_NAME;
+	}
 
-  @Override
-  public long classId() {
-    return windowClassId;
-  }
+	@Override
+	public boolean isLeak(HeapObject.HeapInstance instance) {
+		if (VERBOSE_LOG) {
+			KLog.i(TAG, "run isLeak");
+		}
 
-  @Override
-  public String className() {
-    return WINDOW_CLASS_NAME;
-  }
+		windowCounter.instancesCount++;
+		return false;
+	}
 
-  @Override
-  public boolean isLeak(HeapObject.HeapInstance instance) {
-    if (VERBOSE_LOG) {
-      KLog.i(TAG, "run isLeak");
-    }
+	@Override
+	public String leakReason() {
+		return "Window";
+	}
 
-    windowCounter.instancesCount++;
-    return false;
-  }
+	@Override
+	public ClassCounter instanceCount() {
+		return windowCounter;
+	}
 
-  @Override
-  public String leakReason() {
-    return "Window";
-  }
+	@Override
+	public int generation() {
+		return GENERATION;
+	}
 
-  @Override
-  public ClassCounter instanceCount() {
-    return windowCounter;
-  }
-
-  @Override
-  public int generation() {
-    return GENERATION;
-  }
-
-  @Override
-  public Class<?> clazz() {
-    return Window.class;
-  }
+	@Override
+	public Class<?> clazz() {
+		return Window.class;
+	}
 }

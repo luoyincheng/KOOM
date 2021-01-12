@@ -24,33 +24,33 @@ import android.os.ResultReceiver;
  */
 class IPCReceiver extends ResultReceiver {
 
-  public static final int RESULT_CODE_OK = 1001;
-  public static final int RESULT_CODE_FAIL = 1002;
+	public static final int RESULT_CODE_OK = 1001;
+	public static final int RESULT_CODE_FAIL = 1002;
 
-  private ReceiverCallback receiverCallBack;
+	private ReceiverCallback receiverCallBack;
 
-  public IPCReceiver(ReceiverCallback receiverCallBack) {
-    //null means call back from an arbitrary thread
-    super(null);
+	public IPCReceiver(ReceiverCallback receiverCallBack) {
+		//null means call back from an arbitrary thread
+		super(null);
 
-    this.receiverCallBack = receiverCallBack;
-  }
+		this.receiverCallBack = receiverCallBack;
+	}
 
-  @Override
-  protected void onReceiveResult(int resultCode, Bundle resultData) {
-    super.onReceiveResult(resultCode, resultData);
-    if (receiverCallBack != null) {
-      if (resultCode == RESULT_CODE_OK) {
-        receiverCallBack.onSuccess();
-      } else {
-        receiverCallBack.onError();
-      }
-    }
-  }
+	@Override
+	protected void onReceiveResult(int resultCode, Bundle resultData) {
+		super.onReceiveResult(resultCode, resultData);
+		if (receiverCallBack != null) {
+			if (resultCode == RESULT_CODE_OK) {
+				receiverCallBack.onSuccess();
+			} else {
+				receiverCallBack.onError();
+			}
+		}
+	}
 
-  public interface ReceiverCallback {
-    void onSuccess();
+	public interface ReceiverCallback {
+		void onSuccess();
 
-    void onError();
-  }
+		void onError();
+	}
 }

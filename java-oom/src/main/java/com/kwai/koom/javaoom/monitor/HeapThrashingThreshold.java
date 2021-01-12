@@ -21,37 +21,37 @@ import com.kwai.koom.javaoom.common.KConstants;
  */
 public class HeapThrashingThreshold implements Threshold {
 
-  private static final int DEFAULT_THRASH_SIZE = 100;
-  private static final int DEFAULT_OVER_TIMES = 3;
-  private static final int DEFAULT_POLL_INTERVAL = 5000;
+	private static final int DEFAULT_THRASH_SIZE = 100;
+	private static final int DEFAULT_OVER_TIMES = 3;
+	private static final int DEFAULT_POLL_INTERVAL = 5000;
 
-  @Override
-  public float value() {
-    return DEFAULT_THRASH_SIZE * KConstants.Bytes.MB;
-  }
+	@Override
+	public float value() {
+		return DEFAULT_THRASH_SIZE * KConstants.Bytes.MB;
+	}
 
-  @Override
-  public float maxValue() {
-    return 0;
-  }
+	@Override
+	public float maxValue() {
+		return 0;
+	}
 
-  @Override
-  public int overTimes() {
-    return DEFAULT_OVER_TIMES;
-  }
+	@Override
+	public int overTimes() {
+		return DEFAULT_OVER_TIMES;
+	}
 
-  @Override
-  public boolean ascending() {
-    return false;
-  }
+	@Override
+	public boolean ascending() {
+		return false;
+	}
 
-  @Override
-  public ThresholdValueType valueType() {
-    return ThresholdValueType.BYTES;
-  }
+	@Override
+	public ThresholdValueType valueType() {
+		return ThresholdValueType.BYTES;
+	}
 
-  @Override
-  public int pollInterval() {
-    return DEFAULT_POLL_INTERVAL;
-  }
+	@Override
+	public int pollInterval() {
+		return DEFAULT_POLL_INTERVAL;
+	}
 }

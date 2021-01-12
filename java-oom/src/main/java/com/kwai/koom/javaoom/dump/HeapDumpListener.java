@@ -20,22 +20,22 @@ import com.kwai.koom.javaoom.monitor.TriggerReason;
  * @author Rui Li <lirui05@kuaishou.com>
  */
 public interface HeapDumpListener {
-  /**
-   * Callback on Heap Dump is triggered.
-   *
-   * @param dumpReason dump reason
-   */
-  void onHeapDumpTrigger(TriggerReason.DumpReason dumpReason);
+	/**
+	 * Callback on Heap Dump is triggered.
+	 *
+	 * @param dumpReason dump reason
+	 */
+	void onHeapDumpTrigger(TriggerReason.DumpReason dumpReason);
 
-  /**
-   * Callback on Heap Dump is done.
-   *
-   * @param dumpReason dump reason
-   */
-  void onHeapDumped(TriggerReason.DumpReason dumpReason);
+	/**
+	 * Callback on Heap Dump is done.
+	 *
+	 * @param dumpReason dump reason
+	 */
+	void onHeapDumped(TriggerReason.DumpReason dumpReason);
 
-  /**
-   * Callback on Heap Dump failed.
-   */
-  void onHeapDumpFailed();
+	/**
+	 * Callback on Heap Dump failed.
+	 */
+	void onHeapDumpFailed();
 }
