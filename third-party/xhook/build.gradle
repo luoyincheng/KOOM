@@ -11,7 +11,7 @@ android {
         externalNativeBuild {
             cmake {
                 abiFilters 'armeabi'
-                arguments "-DANDROID_TOOLCHAIN=clang"
+                arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_ARM_MODE=arm"
                 cppFlags '-Wl,--gc-sections -fno-rtti -fvisibility=hidden'
                 cFlags '-Wl,--gc-sections -fvisibility=hidden'
             }
@@ -41,6 +41,7 @@ android {
 //    }
 
     ndkVersion "16.1.4479499"
+//    ndkVersion "22.1.7171670"
 }
 
 dependencies {
