@@ -7,6 +7,9 @@ project( ${TARGET} )
 # Sets the minimum version of CMake required to build the native library.
 cmake_minimum_required(VERSION 3.4.1)
 
+execute_process(COMMAND rm ${CMAKE_CURRENT_SOURCE_DIR}/src/main/so/${ANDROID_ABI}/)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/main/so/${ANDROID_ABI}/)
+
 #add_definitions(-DNDK_DEBUG)
 
 include_directories(

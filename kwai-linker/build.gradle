@@ -33,13 +33,13 @@ android {
 //    ndkVersion "17.2.4988734"
 //    ndkVersion "22.1.7171670"
 
-    sourceSets {
-        main {
-            java.srcDirs = ['src/main/java']
-            jniLibs.srcDir('src/main/libs')
-            jni.srcDirs = []
-        }
-    }
+//    sourceSets {
+//        main {
+//            java.srcDirs = ['src/main/java']
+//            jniLibs.srcDir('src/main/native')
+//            jni.srcDirs = []
+//        }
+//    }
 
     buildTypes {
         release {
