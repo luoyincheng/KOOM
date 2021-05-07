@@ -315,8 +315,9 @@ static void xh_core_refresh_impl() {
   }
 
   while (fgets(line, sizeof(line), fp)) {
+    // todo 替代该方法
     if (sscanf(
-            line, "%" { PRIxPTR } "-%*lx %4s %lx %*x:%*x %*d%n", &base_addr, perm, &offset,
+            line, "%" PRIxPTR "-%*lx %4s %lx %*x:%*x %*d%n", &base_addr, perm, &offset,
             &pathname_pos) != 3)
       continue;
 

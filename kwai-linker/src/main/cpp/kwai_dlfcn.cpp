@@ -27,6 +27,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "skyeye_get_device_api_level.cpp"
 
 namespace kwai {
 namespace linker {
@@ -45,7 +46,8 @@ int dl_iterate_phdr_wrapper(int (*__callback)(struct dl_phdr_info *, size_t, voi
 int DlFcn::android_api_;
 
 void DlFcn::init_api() {
-  android_api_ = android_get_device_api_level();
+//  android_api_ = android_get_device_api_level();
+  android_api_ = get_device_api_level();
   ALOGD("android_api_ = %d", android_api_);
 }
 

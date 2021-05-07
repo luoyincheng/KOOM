@@ -20,6 +20,7 @@
 //
 
 // Created by caikelun on 2018-04-11.
+#include <stdint.h>
 
 #ifndef XH_UTILS_H
 #define XH_UTILS_H 1

@@ -64,8 +64,8 @@ int xh_util_get_mem_protect(uintptr_t addr, size_t len, const char *pathname, un
       }
     }
 
-    if (sscanf(
-            line, "%" { PRIxPTR } "-%" PRIxPTR " %4s ", &start, &end, perm) != 3)
+    // todo 替代该方法
+    if (sscanf(line, "%" PRIxPTR "-%" PRIxPTR " %4s ", &start, &end, perm) != 3)
       continue;
 
     if (perm[3] != 'p') {

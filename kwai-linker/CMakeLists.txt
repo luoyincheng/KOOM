@@ -25,7 +25,8 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        src/main/cpp/kwai_dlfcn.cpp)
+        src/main/cpp/kwai_dlfcn.cpp
+        src/main/cpp/skyeye_get_device_api_level.cpp)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by

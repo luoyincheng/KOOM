@@ -1,0 +1,10 @@
+//
+// Created by yincheng on 21-5-7.
+//
+
+#ifndef KOOM_SKYEYE_GET_DEVICE_API_LEVEL_H
+#define KOOM_SKYEYE_GET_DEVICE_API_LEVEL_H
+
+#define __ANDROID_API_Q__ 29
+
+#endif //KOOM_SKYEYE_GET_DEVICE_API_LEVEL_H
