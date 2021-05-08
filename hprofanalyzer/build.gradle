@@ -30,11 +30,21 @@ android {
 
     ndkVersion "16.1.4479499"
 
-    externalNativeBuild {
-        cmake {
-            path file('CMakeLists.txt')
+    // 编译生成so期间使用，so生成以后，注掉它，然后打开sourceSets，此时so才会打包到aar中
+//    externalNativeBuild {
+//        cmake {
+//            path file('CMakeLists.txt')
+//        }
+//        version "3.10.2"
+//    }
+
+    // 将下面指定的代码、so等全部打包(该代码块只能在so生成后才能打开)
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java']
+            jniLibs.srcDir('libs')
+            jni.srcDirs = []
         }
-        version "3.10.2"
     }
 }
 

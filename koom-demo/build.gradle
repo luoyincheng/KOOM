@@ -19,21 +19,17 @@ android {
         }
     }
 
+    /**
+     * fix: More than one file was found with OS independent path 'lib/armeabi/libc++_shared.so'
+     * 因为: 依赖多个so时，每个libs下都有libc++_shared.so
+     */
     packagingOptions {
         pickFirst('lib/armeabi/libc++_shared.so')
-    }
-
-    sourceSets {
-        main {
-            java.srcDirs = ['src/main/java']
-            jniLibs.srcDir('libs')
-            jni.srcDirs = []
-        }
     }
 }
 
 dependencies {
-    implementation files('libs/hprofanalyzer-release.aar')
+    implementation project(':hprofanalyzer')
     implementation deps.androidx.appcompat
     implementation deps.androidx.constraintlayout
     implementation deps.material

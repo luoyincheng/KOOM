@@ -8,8 +8,9 @@ project(${TARGET})
 
 cmake_minimum_required(VERSION 3.4.1)
 
-execute_process(COMMAND rm ${CMAKE_CURRENT_SOURCE_DIR}/libs/${ANDROID_ABI}/)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/libs/${ANDROID_ABI}/)
+# 编译出so后，将下面两行关闭
+#execute_process(COMMAND rm ${CMAKE_CURRENT_SOURCE_DIR}/libs/${ANDROID_ABI}/)
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/libs/${ANDROID_ABI}/)
 
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/xhook/src/main/cpp/src/
