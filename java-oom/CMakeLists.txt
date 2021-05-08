@@ -12,7 +12,7 @@ execute_process(COMMAND rm ${CMAKE_CURRENT_SOURCE_DIR}/src/main/libs/${ANDROID_A
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/main/libs/${ANDROID_ABI}/)
 
 include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/xhook/src/main/cpp/xhook/src/
+        ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/xhook/src/main/cpp/src/
         ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/linker/src/main/cpp/include/
 )
 
