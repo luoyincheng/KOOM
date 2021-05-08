@@ -12,9 +12,20 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            keyAlias "key0"
+            keyPassword "wodeshijie"
+            storeFile file("koom.jks")
+            storePassword "wodeshijie"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            debuggable false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
