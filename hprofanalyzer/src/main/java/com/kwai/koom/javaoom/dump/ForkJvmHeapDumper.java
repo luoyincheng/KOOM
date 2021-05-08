@@ -2,6 +2,7 @@ package com.kwai.koom.javaoom.dump;
 
 import android.os.Build;
 import android.os.Debug;
+import android.util.Log;
 
 import com.kwai.koom.javaoom.KOOMEnableChecker;
 import com.kwai.koom.javaoom.common.KGlobalConfig;
@@ -36,7 +37,8 @@ public class ForkJvmHeapDumper implements HeapDumper {
 	private boolean soLoaded;
 
 	public ForkJvmHeapDumper() {
-		soLoaded = KGlobalConfig.getSoLoader().loadLib("hprofAnalyzer");
+		soLoaded = KGlobalConfig.getSoLoader().loadLib("hprof_analyzer");
+		Log.i("loadso", "ForkJvmHeapDumper > " + soLoaded);
 		if (soLoaded) {
 			initForkDump();
 		}

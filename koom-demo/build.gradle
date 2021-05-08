@@ -20,14 +20,20 @@ android {
     }
 
     packagingOptions {
-        // todo
-        pickFirst('lib/armeabi-v7a/libc++_shared.so')
-        pickFirst('lib/arm64-v8a/libc++_shared.so')
+        pickFirst('lib/armeabi/libc++_shared.so')
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java']
+            jniLibs.srcDir('libs')
+            jni.srcDirs = []
+        }
     }
 }
 
 dependencies {
-    implementation project(':hprofanalyzer')
+    implementation files('libs/hprofanalyzer-release.aar')
     implementation deps.androidx.appcompat
     implementation deps.androidx.constraintlayout
     implementation deps.material

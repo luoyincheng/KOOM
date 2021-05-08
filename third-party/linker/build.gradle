@@ -30,14 +30,6 @@ android {
 
     ndkVersion "16.1.4479499"
 
-//    sourceSets {
-//        main {
-//            java.srcDirs = ['src/main/java']
-//            jniLibs.srcDir('src/main/native')
-//            jni.srcDirs = []
-//        }
-//    }
-
     buildTypes {
         release {
             minifyEnabled false

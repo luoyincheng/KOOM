@@ -2,3 +2,4 @@
 /.cxx
 /.externalNativeBuild
 .DS_Store
+/libs

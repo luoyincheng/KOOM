@@ -1,15 +1,15 @@
 # For more information about using CMake with Android Studio, read the
 # documentation: https://d.android.com/studio/projects/add-native-code.html
 
-set(TARGET hprofAnalyzer)
+set(TARGET hprof_analyzer)
 project(${TARGET})
 
 # Sets the minimum version of CMake required to build the native library.
 
 cmake_minimum_required(VERSION 3.4.1)
 
-execute_process(COMMAND rm ${CMAKE_CURRENT_SOURCE_DIR}/src/main/libs/${ANDROID_ABI}/)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/main/libs/${ANDROID_ABI}/)
+execute_process(COMMAND rm ${CMAKE_CURRENT_SOURCE_DIR}/libs/${ANDROID_ABI}/)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/libs/${ANDROID_ABI}/)
 
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/xhook/src/main/cpp/src/
@@ -17,8 +17,8 @@ include_directories(
 )
 
 link_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/linker/src/main/libs/${ANDROID_ABI}/
-        ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/xhook/src/main/libs/${ANDROID_ABI}/
+        ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/xhook/libs/${ANDROID_ABI}/
+        ${CMAKE_CURRENT_SOURCE_DIR}/../third-party/linker/libs/${ANDROID_ABI}/
 )
 
 # Creates and names a library, sets it as either STATIC
@@ -52,7 +52,7 @@ find_library( # Sets the name of the path variable.
 # build script, prebuilt third-party libraries, or system libraries.
 
 target_link_libraries( # Specifies the target library.
-        hprofAnalyzer
+        hprof_analyzer
         xhook_lib
         linker
         # Links the target library to the log library

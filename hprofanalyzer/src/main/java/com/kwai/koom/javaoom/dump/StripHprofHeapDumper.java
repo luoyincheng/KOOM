@@ -1,6 +1,7 @@
 package com.kwai.koom.javaoom.dump;
 
 import android.os.Debug;
+import android.util.Log;
 
 import com.kwai.koom.javaoom.KOOMEnableChecker;
 import com.kwai.koom.javaoom.common.KGlobalConfig;
@@ -35,7 +36,8 @@ public class StripHprofHeapDumper implements HeapDumper {
 	private boolean soLoaded;
 
 	public StripHprofHeapDumper() {
-		soLoaded = KGlobalConfig.getSoLoader().loadLib("hprofAnalyzer");
+		soLoaded = KGlobalConfig.getSoLoader().loadLib("hprof_analyzer");
+		Log.i("loadso", "StripHprofHeapDumper > " + soLoaded);
 		if (soLoaded) {
 			initStripDump();
 		}

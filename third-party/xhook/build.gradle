@@ -26,13 +26,6 @@ android {
         }
     }
 
-//    sourceSets {
-//        main {
-//            java.srcDirs = ['src/main/java']
-//            jniLibs.srcDir('src/main/libs')
-//        }
-//    }
-
     ndkVersion "16.1.4479499"
 
     externalNativeBuild {
