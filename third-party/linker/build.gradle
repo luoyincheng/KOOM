@@ -29,7 +29,6 @@ android {
     }
 
     ndkVersion "16.1.4479499"
-//    ndkVersion "22.1.7171670"
 
 //    sourceSets {
 //        main {

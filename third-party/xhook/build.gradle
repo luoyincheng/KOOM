@@ -19,13 +19,6 @@ android {
 
     }
 
-    externalNativeBuild {
-        cmake {
-            path "src/main/cpp/xhook/CMakeLists.txt"
-        }
-        version "3.10.2"
-    }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -41,7 +34,13 @@ android {
 //    }
 
     ndkVersion "16.1.4479499"
-//    ndkVersion "22.1.7171670"
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/xhook/CMakeLists.txt"
+        }
+        version "3.10.2"
+    }
 }
 
 dependencies {
