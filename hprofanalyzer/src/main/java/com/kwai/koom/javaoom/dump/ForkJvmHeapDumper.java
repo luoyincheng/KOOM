@@ -36,7 +36,7 @@ public class ForkJvmHeapDumper implements HeapDumper {
 	private boolean soLoaded;
 
 	public ForkJvmHeapDumper() {
-		soLoaded = KGlobalConfig.getSoLoader().loadLib("koom-java");
+		soLoaded = KGlobalConfig.getSoLoader().loadLib("hprofAnalyzer");
 		if (soLoaded) {
 			initForkDump();
 		}

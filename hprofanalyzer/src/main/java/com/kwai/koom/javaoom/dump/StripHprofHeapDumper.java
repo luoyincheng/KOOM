@@ -35,7 +35,7 @@ public class StripHprofHeapDumper implements HeapDumper {
 	private boolean soLoaded;
 
 	public StripHprofHeapDumper() {
-		soLoaded = KGlobalConfig.getSoLoader().loadLib("koom-java");
+		soLoaded = KGlobalConfig.getSoLoader().loadLib("hprofAnalyzer");
 		if (soLoaded) {
 			initStripDump();
 		}

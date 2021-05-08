@@ -1,6 +1,6 @@
 include ':third-party:linker'
 include ':koom-demo'
-include ':java-oom'
+include ':hprofanalyzer'
 include ':third-party:xhook'
 include ':third-party:shark'
 rootProject.name = "KOOM"
