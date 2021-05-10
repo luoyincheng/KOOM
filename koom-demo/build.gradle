@@ -23,10 +23,19 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             debuggable false
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        debug {
+            minifyEnabled false
+            debuggable true
+            // 只有加上这句，才能在点击运行按钮的时候，在生成的debug apk 中才会包含so文件
+            ndk {
+                abiFilters 'armeabi'
+            }
         }
     }
 
